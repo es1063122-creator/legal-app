@@ -21,8 +21,14 @@ jobs:
       - name: 패키지 설치
         run: pip install -r requirements.txt
 
-      - name: 법령 자동 수집 실행
+      - name: 고시·예규·훈령 자동 수집
         env:
           FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
           LAW_OC: ${{ secrets.LAW_OC }}
         run: python fetch_laws.py
+
+      - name: 별표·서식 자동 수집
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+          LAW_OC: ${{ secrets.LAW_OC }}
+        run: python fetch_byeolpyo.py
