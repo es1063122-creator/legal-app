@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KDH AI 법령봇</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --orange: #ea580c;
+      --orange-light: #fb923c;
+      --yellow: #f59e0b;
+
+      /* 동진 톤 */
+      --navy: #0b1b3b;
+      --navy2:#1c2b3a;
+
+      --bg: #ffffff;     /* ✅ 배경 제거: 전체 흰색 */
+      --panel: #ffffff;
+      --gray: #e5e7eb;
+
+      --text: #1e293b;
+      --muted: #64748b;
+
+      --shadow: 0 26px 70px rgba(0,0,0,0.18);
+      --radius: 22px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding: 0;
+    }
+
+    /* ✅ 전체화면 */
+    .chat-panel {
+      width: 100vw;
+      height: 100vh;
+      max-height: 100vh;
+      background: var(--panel);
+      border-radius: 0;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: none;
+    }
+
+    /* ✅ 헤더 제거 - 앱에서 숨김 */
+    .chat-header {
+      display: none;
+    }
+
+    .chat-header-name {
+      font-family: 'Gmarket Sans', sans-serif;
+      color: #fff;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing:-0.2px;
+      text-align:center;
+    }
+    .chat-header-sub {
+      color: #fb923c;
+      font-size: 0.74rem;
+      margin-top: 2px;
+      font-weight: 700;
+      text-align:center;
+    }
+
+    .chat-header-status {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    .status-txt {
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    .chat-close {
+      position:absolute;
+      right: 14px;
+      top: 14px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      color: #94a3b8;
+      font-size: 1rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: all .18s;
+    }
+    .chat-close:hover {
+      background: rgba(234,88,12,0.18);
+      color: #fb923c;
+      transform: scale(1.05);
+    }
+
+    /* 탭 */
+    .law-tabs {
+      display: flex;
+      overflow-x: auto;
+      gap: 0;
+      background: #f8fafc;
+      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
+      padding: 0 6px;
+    }
+    .law-tabs::-webkit-scrollbar { height: 0; }
+
+    .law-tab {
+      padding: 10px 12px;
+      font-size: 0.74rem;
+      font-weight: 900;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--muted);
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      transition: all 0.15s;
+      font-family: 'Nanum Gothic', sans-serif;
+    }
+    .law-tab:hover { color: var(--orange); }
+    .law-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+    /* 메시지 */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+      background: #f8fafc;
+      scroll-behavior:smooth;
+    }
+    .chat-messages::-webkit-scrollbar { width: 5px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+    .msg { display:flex; gap: 10px; align-items:flex-end; }
+    .msg.user { flex-direction: row-reverse; }
+
+    /* ✅ 캐릭터 작게 - 채팅창 확보 */
+.msg-avatar{
+  background:none;
+  box-shadow:none;
+  width:70px;              /* 🔥 영역 축소 */
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.msg-avatar img{
+  width:80px;              /* 🔥 캐릭터 작게 */
+  height:auto;
+  object-fit:contain;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.20));
+  transition: transform .2s ease;
+}
+
+/* 말할 때 살짝 확대 효과 */
+.msg.bot .msg-avatar img{
+  transform: scale(1.05);
+}
+    .msg.user .msg-avatar{
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #e5e7eb;
+      color:#111827;
+      box-shadow:none;
+      font-size: 0.95rem;
+      font-weight: 900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .msg-content { max-width: 80%; display:flex; flex-direction:column; gap: 5px; }
+    .msg.user .msg-content { align-items:flex-end; }
+
+    .msg-name {
+      font-size: 0.70rem;
+      font-weight: 900;
+      color:#6b7280;
+      letter-spacing:-0.2px;
+    }
+
+    .msg-bubble {
+      position: relative; /* ✅ 꼬리 위치 기준 */
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 0.90rem;
+      line-height: 1.65;
+      word-break: keep-all;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+    }
+
+    .msg.bot .msg-bubble {
+      background:#ffffff;
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(15,23,42,0.06);
+    }
+    /* ✅ 봇 말풍선 꼬리 */
+    .msg.bot .msg-bubble::after{
+      content:"";
+      position:absolute;
+      left:-10px;
+      top:18px;
+      border-width:8px;
+      border-style:solid;
+      border-color:transparent #ffffff transparent transparent;
+    }
+
+    .msg.user .msg-bubble {
+      background: linear-gradient(135deg, #c2410c, #ea580c);
+      color:#fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 12px 24px rgba(234,88,12,0.20);
+    }
+    /* ✅ 유저 말풍선 꼬리 */
+    .msg.user .msg-bubble::after{
+      content:"";
+      position:absolute;
+      right:-10px;
+      top:18px;
+      border-width:8px;
+      border-style:solid;
+      border-color:transparent transparent transparent #ea580c;
+    }
+
+    .msg-time {
+      font-size: 0.68rem;
+      color:#9ca3af;
+      padding: 0 4px;
+      font-weight: 800;
+    }
+
+    /* 실무보고형 섹션 */
+    .ai-section {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-left: 4px solid var(--orange);
+      background: #fff7ed;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      border: 1px solid rgba(234,88,12,0.18);
+    }
+    .ai-title {
+      font-weight: 900;
+      color: #c2410c;
+      margin-bottom: 6px;
+      letter-spacing:-0.2px;
+    }
+    .penalty { color:#dc2626; font-weight: 900; }
+    .fine { color:#ea580c; font-weight: 900; }
+    .hint { color:#334155; font-weight: 800; }
+
+    /* 법령 카드 */
+    .law-cards { display:flex; flex-direction:column; gap: 8px; margin-top: 8px; }
+    .law-card {
+      background:#fff;
+      border:1px solid #fed7aa;
+      border-left:4px solid var(--orange);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .law-card-badge {
+      display:inline-block;
+      background: rgba(234,88,12,0.10);
+      color: var(--orange);
+      font-size: 0.70rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+    .law-card-title {
+      font-weight: 900;
+      color: var(--navy);
+      font-size: 0.86rem;
+      margin-bottom: 4px;
+    }
+    .law-card-desc {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.80rem;
+      font-weight: 700;
+    }
+    .law-card-link {
+      display:inline-block;
+      margin-top: 7px;
+      color: var(--orange);
+      font-weight: 900;
+      text-decoration: none;
+      font-size: 0.80rem;
+    }
+    .law-card-link:hover { text-decoration: underline; }
+
+    /* 타이핑 */
+    .typing-indicator {
+      display:flex;
+      gap: 6px;
+      padding: 12px 14px;
+      background:#ffffff;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #fb923c;
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-7px)} }
+
+    /* 퀵버튼 */
+    .quick-btns { display:flex; flex-wrap:wrap; gap: 6px; margin-top: 10px; }
+    .quick-btn{
+      background:#fff7ed;
+      color:#c2410c;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.74rem;
+      cursor:pointer;
+      font-weight: 900;
+      transition: all .14s;
+    }
+    .quick-btn:hover{
+      background: var(--orange);
+      color:#fff;
+      border-color: var(--orange);
+      transform: translateY(-1px);
+    }
+
+    /* 입력 */
+    .chat-input-area{
+      padding: 12px 14px;
+      border-top: 1px solid #e5e7eb;
+      background:#ffffff;
+      display:flex;
+      gap: 10px;
+      align-items:flex-end;
+      flex-shrink:0;
+    }
+    .chat-input{
+      flex:1;
+      border: 1.6px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-family: 'Nanum Gothic', sans-serif;
+      resize:none;
+      outline:none;
+      max-height: 120px;
+      line-height: 1.55;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .chat-input:focus{
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(234,88,12,0.10);
+    }
+    .send-btn{
+      width: 46px; height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #c2410c, #ea580c);
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: opacity .18s, transform .14s;
+      flex-shrink:0;
+      box-shadow: 0 8px 18px rgba(234,88,12,0.28);
+    }
+    .send-btn:hover { opacity: .92; transform: scale(1.05); }
+    .send-btn:disabled { opacity: .45; cursor:not-allowed; transform:none; }
+
+    /* 면책 - 작게 */
+    .disclaimer{
+      background:#fff7ed;
+      border-top: 1px solid #fed7aa;
+      padding: 4px 10px;
+      font-size: 0.60rem;
+      color:#92400e;
+      text-align:center;
+      flex-shrink:0;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 560px){
+      .chat-panel{
+        width: calc(100vw - 24px);
+        height: calc(100vh - 24px);
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="chat-panel" id="chatPanel">
+
+    <!-- ✅ 헤더 (flying 제거 + 중앙정렬) -->
+    <div class="chat-header">
+      <div style="flex:1; text-align:center;">
+        <div class="chat-header-name">KDH AI 법령봇</div>
+        <div class="chat-header-sub">산안법 · 중처법 · 건기법 · 현장 실무 기준</div>
+        <div class="chat-header-status">
+          <span class="status-dot"></span>
+          <span class="status-txt" id="statusText">KDH-safety</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 카테고리 탭 -->
+    <div class="law-tabs">
+      <button class="law-tab active" onclick="setTab(this, [])">전체</button>
+      <button class="law-tab" onclick="setTab(this, ['안전관리자 선임 기준이 어떻게 되나요?','위험성평가 실시 의무가 있나요?','추락 방지 법적 기준은?'])">산안법</button>
+      <button class="law-tab" onclick="setTab(this, ['중대재해처벌법 적용 대상은?','경영책임자 의무는?','중대산업재해 발생 시 처벌은?'])">중대재해법</button>
+      <button class="law-tab" onclick="setTab(this, ['안전관리계획서 제출 대상은?','건설기술진흥법 안전점검 종류는?','발주청 안전의무는?'])">건기진흥법</button>
+      <button class="law-tab" onclick="setTab(this, ['비계 작업발판 폭 기준은?','개구부 덮개/난간 설치기준은?','밀폐공간 측정/환기 기준은?'])">현장안전</button>
+      <button class="law-tab" onclick="setTab(this, ['산재 인정 기준은?','출퇴근 재해도 산재인가요?','산재 보고 의무는?'])">산재보험</button>
+    </div>
+
+    <!-- 메시지 영역 -->
+    <div class="chat-messages" id="chatMessages">
+      <!-- 환영 메시지 -->
+      <div class="msg bot">
+        <div class="msg-avatar">
+          <img class="bot-img" id="botFace"
+               src="https://raw.githubusercontent.com/es1063122-creator/ai-bot/main/dj-ai-default.png"
+               alt="bot">
+        </div>
+        <div class="msg-content">
+          <span class="msg-name">도우미</span>
+          <div class="msg-bubble">
+            안녕하세요! 👋<br>
+            저는 <strong>안전 법령 전문 AI 도우미</strong>예요.<br>
+            궁금한 법령을 물어보시면, 관련 근거(조문/별표)를 찾아서
+            <strong>실무 적용 중심</strong>으로 쉽게 정리해드릴게요.
+            <div class="quick-btns" id="quickBtns">
+              <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
+              <button class="quick-btn" onclick="sendQuick('중대재해처벌법 적용 대상은?')">중대재해 적용</button>
+              <button class="quick-btn" onclick="sendQuick('추락 방지 안전조치 기준은?')">추락방지</button>
+              <button class="quick-btn" onclick="sendQuick('밀폐공간 작업 시 법적 수칙은?')">밀폐공간</button>
+              <button class="quick-btn" onclick="sendQuick('위험성평가 실시 의무가 있나요?')">위험성평가</button>
+              <button class="quick-btn" onclick="sendQuick('산재 발생 시 사업주 의무/보고는?')">산재 보고</button>
+            </div>
+          </div>
+          <div class="msg-time">지금</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="예) 난간대 높이 기준은? / 안전관리자 선임은? / 과태료는?" rows="1"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="보내기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ 법적 효력이 있는 전문 법률 조언이 아닙니다. 중요 사안은 전문가(노무사/변호사/공단)와 확인하세요.
+    </div>
+
+  </div>
+
+<script>
+/* ============================================================
+   ✅ 구글 Apps Script 웹앱 URL
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzZ3jSi8r6vYys-afA7UhsZpTqr2-7dbZK5A52GtPZYKp641PHE90E8NdYaidP10w/exec';
+/* ============================================================ */
+
+/* ✅ 캐릭터 이미지 베이스(4종)
+   dj-ai-default.png / dj-ai-thinking.png / dj-ai-warning.png / dj-ai-error.png */
+const BOT_BASE = "https://raw.githubusercontent.com/es1063122-creator/ai-bot/main/";
+const BOT_FACE = document.getElementById('botFace');
+const STATUS_TXT = document.getElementById('statusText');
+
+let currentEmotion = "default";
+function setEmotion(type){
+  currentEmotion = type;
+  BOT_FACE.src = BOT_BASE + "dj-ai-" + type + ".png";
+
+  if(type === "thinking") STATUS_TXT.textContent = "법령 검색/분석 중…";
+  else if(type === "warning") STATUS_TXT.textContent = "처벌/과태료 위험 분석";
+  else if(type === "error") STATUS_TXT.textContent = "오류 발생";
+  else STATUS_TXT.textContent = "KDH-safety";
+}
+
+const messages = document.getElementById('chatMessages');
+const input    = document.getElementById('chatInput');
+const sendBtn  = document.getElementById('sendBtn');
+
+let isTyping = false;
+let conversationHistory = [];
+
+// 🔥 Enter = 전송 / Shift+Enter = 줄바꿈
+input.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+/* 자동 높이 */
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+
+function sendQuick(text){
+  input.value = text;
+  input.dispatchEvent(new Event('input'));
+  sendMessage();
+}
+
+function nowTime(){
+  return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* 탭 처리 */
+function setTab(el, quickList){
+  document.querySelectorAll('.law-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+
+  const qb = document.getElementById('quickBtns');
+  if(!qb) return;
+
+  if(quickList.length > 0){
+    qb.innerHTML = quickList.map(q =>
+      `<button class="quick-btn" onclick="sendQuick(${JSON.stringify(q)})">${q.length > 18 ? q.slice(0,17)+'…' : q}</button>`
+    ).join('');
+  } else {
+    qb.innerHTML = `
+      <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
+      <button class="quick-btn" onclick="sendQuick('중대재해처벌법 적용 대상은?')">중대재해 적용</button>
+      <button class="quick-btn" onclick="sendQuick('추락 방지 안전조치 기준은?')">추락방지</button>
+      <button class="quick-btn" onclick="sendQuick('밀폐공간 작업 시 법적 수칙은?')">밀폐공간</button>
+      <button class="quick-btn" onclick="sendQuick('위험성평가 실시 의무가 있나요?')">위험성평가</button>
+      <button class="quick-btn" onclick="sendQuick('산재 발생 시 사업주 의무/보고는?')">산재 보고</button>
+    `;
+  }
+}
+
+/* 메시지 추가 (lawCards 포함) */
+function appendMessage(role, html, lawCards){
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role}`;
+
+  let avatarHtml = '';
+  if(role === 'bot'){
+    avatarHtml = `<div class="msg-avatar"><img src="${BOT_BASE + 'dj-ai-' + currentEmotion + '.png'}" alt="bot"></div>`;
+  } else {
+    avatarHtml = `<div class="msg-avatar">👷</div>`;
+  }
+
+  let cardsHtml = '';
+  if(Array.isArray(lawCards) && lawCards.length > 0){
+    cardsHtml = `<div class="law-cards">` + lawCards.map(c => `
+      <div class="law-card">
+        <span class="law-card-badge">📋 관련법령</span>
+        <div class="law-card-title">${escapeHtml_(c.name || '')}</div>
+        ${c.desc ? `<div class="law-card-desc">${escapeHtml_(c.desc)}</div>` : ''}
+        ${c.url ? `<a class="law-card-link" href="${c.url}" target="_blank" rel="noopener">🔗 법령 전문 보기 →</a>` : ''}
+      </div>
+    `).join('') + `</div>`;
+  }
+
+  wrap.innerHTML = `
+    ${avatarHtml}
+    <div class="msg-content">
+      <span class="msg-name">${role === 'bot' ? '도우미' : '나'}</span>
+      <div class="msg-bubble">${html}</div>
+      ${cardsHtml}
+      <div class="msg-time">${nowTime()}</div>
+    </div>
+  `;
+
+  messages.appendChild(wrap);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping(){
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.id = 'typingMsg';
+  d.innerHTML = `
+    <div class="msg-avatar"><img src="${BOT_BASE + 'dj-ai-thinking.png'}" alt="bot"></div>
+    <div class="msg-content">
+      <span class="msg-name">KDH</span>
+      <div class="typing-indicator">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+  messages.appendChild(d);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function hideTyping(){
+  const t = document.getElementById('typingMsg');
+  if(t) t.remove();
+}
+
+/* ✅ 답변 내용에 따라 표정 전환 */
+function applyEmotionByText(reply){
+  const danger = ["징역","벌금","처벌","과태료","위반","형사","벌칙","행정처분","영업정지","송치","기소"];
+  const isWarning = danger.some(w => reply.includes(w));
+  setEmotion(isWarning ? "warning" : "default");
+}
+
+/* ✅ 서버가 주는 답변을 실무보고형으로 정리(가능하면) */
+function toReportStyleHtml_(rawText){
+  // 서버가 이미 HTML을 주는 경우 그대로 사용 (단순히 판단)
+  const looksHtml = /<\/?(div|br|strong|span|a|ul|li|p)\b/i.test(rawText);
+  if(looksHtml) return rawText;
+
+  // 기본은 텍스트를 보고서형 섹션으로 감싸기(간단)
+  const safe = escapeHtml_(rawText).replace(/\n/g,'<br>');
+
+  return `
+    <div class="ai-section">
+      <div class="ai-title">🧾 답변</div>
+      <div class="hint">${safe}</div>
+    </div>
+  `;
+}
+
+/* ✅ Apps Script 호출 */
+async function sendMessage(){
+  const text = input.value.trim();
+  if(!text || isTyping) return;
+
+  appendMessage('user', escapeHtml_(text).replace(/\n/g,'<br>'));
+  conversationHistory.push({ role: 'user', content: text });
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  sendBtn.disabled = true;
+  isTyping = true;
+
+  setEmotion("thinking");
+  showTyping();
+
+  try{
+    // ✅ 서버가 question/history 둘 다 받는 형태 대응
+    const payload = {
+      question: text,
+      history: conversationHistory
+    };
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+    });
+
+    // 응답이 JSON이 아닐 수도 있어 방어
+    const textBody = await res.text();
+    let data = null;
+    try { data = JSON.parse(textBody); }
+    catch(_e){ data = { success:false, error:'JSON 파싱 실패', raw:textBody }; }
+
+    hideTyping();
+
+    // ✅ 다양한 응답 키 지원
+    // - {reply, laws}
+    // - {answer, laws}
+    // - {success:true, answer}
+    // - {success:true, reply}
+    // - {success:false, error}
+    const ok = (data && (data.success === true || data.reply || data.answer));
+    if(!ok){
+      setEmotion("error");
+      const errMsg = data?.error ? String(data.error) : '서버 응답 형식 오류';
+      appendMessage('bot', `❌ 서버 오류: ${escapeHtml_(errMsg)}<br><br><span class="hint">Apps Script 배포/권한/URL을 확인하세요.</span>`);
+      sendBtn.disabled = false;
+      isTyping = false;
+      return;
+    }
+
+    let reply = data.reply || data.answer || '(빈 응답)';
+    let laws  = Array.isArray(data.laws) ? data.laws : [];
+
+    // 표정 전환
+    applyEmotionByText(reply);
+
+    // 실무보고형 래핑
+    const replyHtml = toReportStyleHtml_(reply);
+
+    conversationHistory.push({ role: 'assistant', content: reply });
+    appendMessage('bot', replyHtml, laws);
+
+  } catch(err){
+    hideTyping();
+    setEmotion("error");
+    appendMessage('bot', '❌ 서버 연결 오류가 발생했습니다.<br>Apps Script URL/배포(웹앱) 설정을 확인해 주세요.');
+  }
+
+  sendBtn.disabled = false;
+  isTyping = false;
+}
+
+/* HTML escape */
+function escapeHtml_(s){
+  return String(s)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
+}
+
+/* 시작 상태 */
+setEmotion("default");
+</script>
+
+</body>
+</html>
