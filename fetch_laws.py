@@ -1,12 +1,14 @@
 import os
 import json
 import requests
-from bs4 import BeautifulSoup
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-print("=== fetch_laws.py 버전 v5 시작 ===")
+print("=== fetch_laws.py 버전 v6 ===")
+
+OC = os.environ.get("LAW_OC", "es5183")
 
 SAFETY_KEYWORDS = [
     "산업안전", "안전보건", "재해예방", "산업재해",
@@ -19,7 +21,14 @@ SAFETY_KEYWORDS = [
     "중대재해", "중대산업재해", "공정안전",
 ]
 
-BASE_URL = "https://www.moel.go.kr/info/lawinfo/instruction/list.do"
+LAW_TYPES = [
+    {"code": "2", "label": "고시"},
+    {"code": "3", "label": "예규"},
+    {"code": "4", "label": "훈령"},
+]
+
+# 법제처 API - 키워드별 검색
+SEARCH_QUERIES = ["산업안전", "안전보건", "중대재해", "재해예방", "안전관리"]
 
 def init_firebase():
     cred_json = os.environ.get("FIREBASE_CREDENTIALS")
@@ -34,110 +43,108 @@ def is_safety_related(title):
     return any(kw in title for kw in SAFETY_KEYWORDS)
 
 def format_date(raw):
-    raw = str(raw).strip().replace("-", "").replace(".", "").replace("/", "")
+    raw = str(raw).strip().replace("-", "").replace(".", "")
     if len(raw) >= 8:
         return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
     return raw
 
-def fetch_moel_notices(max_pages=5):
-    """고용노동부 고시·예규·훈령 목록 수집"""
+def get_text(item, *tags):
+    for tag in tags:
+        el = item.find(tag)
+        if el is not None and el.text:
+            return el.text.strip()
+    return ""
+
+def fetch_laws_api(query, type_code):
+    """법제처 행정규칙 API - query 검색"""
     items = []
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-    }
 
-    for page in range(1, max_pages + 1):
-        params = {
-            "pageIndex": page,
-            "searchType": "",
-            "searchWord": "",
-        }
+    # 방법1: query 파라미터
+    for url_template in [
+        f"https://www.law.go.kr/DRF/lawSearch.do?OC={OC}&target=ordin&type=XML&display=20&page=1&ordinType={type_code}&query={query}",
+        f"https://www.law.go.kr/DRF/lawSearch.do?OC={OC}&target=ordin&type=XML&display=20&page=1&ordinType={type_code}&search=1&query={query}",
+    ]:
         try:
-            res = requests.get(BASE_URL, params=params,
-                             headers=headers, timeout=15)
+            res = requests.get(url_template, timeout=15)
             res.encoding = "utf-8"
-            soup = BeautifulSoup(res.text, "html.parser")
+            root = ET.fromstring(res.text)
 
-            rows = soup.select("table tbody tr")
-            print(f"  페이지 {page}: {len(rows)}개 행")
+            total_el = root.find("totalCnt")
+            total = int(total_el.text) if total_el is not None and total_el.text else 0
+            print(f"    [{query}/{type_code}] totalCnt={total}")
 
-            if not rows:
+            if total > 0:
+                found = root.findall(".//ordin") or root.findall(".//OrdinInfo")
+                print(f"    → ordin 태그: {len(found)}개")
+                if found:
+                    # 첫 항목 태그 출력
+                    first = found[0]
+                    print(f"    첫 항목 태그들: {[c.tag for c in first]}")
+                    items.extend(found)
+                    break
+                else:
+                    # totalCnt>0인데 ordin이 없으면 전체 XML 출력
+                    print(f"    XML: {res.text[:800]}")
                 break
-
-            for row in rows:
-                cols = row.select("td")
-                if len(cols) < 4:
-                    continue
-
-                title_el = row.select_one("td a") or (cols[1] if len(cols) > 1 else None)
-                title = title_el.get_text(strip=True) if title_el else ""
-
-                if not title or not is_safety_related(title):
-                    continue
-
-                # 날짜
-                date_text = cols[-2].get_text(strip=True) if len(cols) >= 3 else ""
-
-                # 링크
-                link_el = row.select_one("td a")
-                href = ""
-                if link_el and link_el.get("href"):
-                    href = "https://www.moel.go.kr" + link_el["href"]
-                    if not href.startswith("http"):
-                        href = BASE_URL
-
-                items.append({
-                    "title": title,
-                    "date": date_text,
-                    "url": href or BASE_URL,
-                    "type": "고시",
-                })
-                print(f"    ✅ {title} ({date_text})")
-
         except Exception as e:
-            print(f"  ❌ 오류: {e}")
-            break
+            print(f"    ❌ {e}")
 
     return items
 
-def save_to_firestore(db, item):
-    title = item["title"]
-    raw_date = item["date"].replace("-", "").replace(".", "").replace("/", "")
-    doc_id = f"notice_{raw_date}_{title[:15].replace(' ', '_')}"
+def save_to_firestore(db, item, type_label):
+    title = get_text(item,
+        "ordinNm", "법령명", "ordin_nm", "ORDIN_NM",
+        "제목", "title", "lawNm", "name", "NM"
+    )
+    if not title or not is_safety_related(title):
+        return False
 
-    existing = db.collection("legal_updates").document(doc_id).get()
-    if existing.exists:
+    raw_date = get_text(item,
+        "promulgationDt", "공포일자", "시행일자", "enforcementDt", "발령일자"
+    ).replace("-", "").replace(".", "")
+
+    law_id = get_text(item, "ordinSeq", "법령ID")
+    source_url = get_text(item, "법령상세링크") or (
+        f"https://www.law.go.kr/ordinInfoP.do?ordinSeq={law_id}" if law_id
+        else "https://www.moel.go.kr/info/lawinfo/instruction/list.do"
+    )
+    ministry = get_text(item, "ordinOrg", "기관명") or "고용노동부"
+
+    doc_id = f"notice_{raw_date}_{title[:15].replace(' ', '_')}"
+    if db.collection("legal_updates").document(doc_id).get().exists:
         return False
 
     db.collection("legal_updates").document(doc_id).set({
         "category":   "notice",
-        "lawType":    item.get("type", "고시"),
+        "lawType":    type_label,
         "title":      title,
-        "ministry":   "고용노동부",
+        "ministry":   ministry,
         "lawName":    title,
         "date":       raw_date,
         "postedDate": format_date(raw_date),
-        "sourceUrl":  item["url"],
+        "sourceUrl":  source_url,
         "summary":    "",
         "importance": "normal",
         "updatedAt":  datetime.now(timezone.utc),
     })
-    print(f"  💾 저장: {title}")
+    print(f"  ✅ [{type_label}] {title}")
     return True
 
 def main():
-    print(f"🚀 고용노동부 안전 법령 수집 시작")
+    print(f"🚀 법제처 안전 법령 수집 v6")
+    print(f"   OC: {OC}")
     print(f"   실행: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
 
     db = init_firebase()
     total = 0
 
-    items = fetch_moel_notices(max_pages=5)
-    print(f"\n총 {len(items)}개 안전 관련 항목 발견")
-
-    for item in items:
-        if save_to_firestore(db, item):
-            total += 1
+    for law_type in LAW_TYPES:
+        print(f"\n🔍 [{law_type['label']}]")
+        for query in SEARCH_QUERIES:
+            items = fetch_laws_api(query, law_type["code"])
+            for item in items:
+                if save_to_firestore(db, item, law_type["label"]):
+                    total += 1
 
     print(f"\n🎉 완료! {total}개 저장")
 
