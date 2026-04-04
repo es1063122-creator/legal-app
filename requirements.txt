@@ -1,2 +1,4 @@
-requests==2.31.0
-firebase-admin==6.5.0
+requests
+firebase-admin
+beautifulsoup4
+lxml
