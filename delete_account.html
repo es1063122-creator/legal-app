@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>계정 삭제 요청 - 세이프로</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #F0F4FF;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 24px;
+    padding: 40px 32px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .shield {
+    width: 40px; height: 40px;
+    background: #2563EB;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px;
+  }
+  .logo-text { font-size: 22px; font-weight: 900; color: #0F172A; }
+  h1 { font-size: 22px; font-weight: 900; color: #0F172A; margin-bottom: 12px; }
+  p { font-size: 14px; color: #6B7280; line-height: 1.7; margin-bottom: 24px; }
+  .warning {
+    background: #FFF1D6;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+  }
+  .warning p { color: #EA580C; margin: 0; font-size: 13px; }
+  label { display: block; font-size: 14px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+  input, textarea {
+    width: 100%;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #0F172A;
+    outline: none;
+    margin-bottom: 16px;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus { border-color: #2563EB; }
+  textarea { height: 100px; resize: none; }
+  button {
+    width: 100%;
+    background: #DC2626;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  button:hover { background: #B91C1C; }
+  .contact {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+  .contact a { color: #2563EB; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="shield">🛡</div>
+    <div class="logo-text">세이프로</div>
+  </div>
+  <h1>계정 및 데이터 삭제 요청</h1>
+  <p>아래 양식을 작성하시면 영업일 기준 3일 이내에 계정 및 관련 데이터를 삭제해 드립니다.</p>
+  <div class="warning">
+    <p>⚠️ 삭제 후에는 모든 데이터(이용 기록, 구독 정보 등)가 복구되지 않습니다.</p>
+  </div>
+  <form action="mailto:reebokdh@hanmail.net" method="get" enctype="text/plain">
+    <label>카카오 이메일 또는 닉네임</label>
+    <input type="text" name="계정정보" placeholder="카카오 닉네임 또는 이메일" required>
+    <label>삭제 사유 (선택)</label>
+    <textarea name="삭제사유" placeholder="삭제 사유를 간단히 입력해주세요."></textarea>
+    <button type="submit">계정 삭제 요청하기</button>
+  </form>
+  <div class="contact">
+    문의: <a href="mailto:reebokdh@hanmail.net">reebokdh@hanmail.net</a>
+  </div>
+</div>
+</body>
+</html>
