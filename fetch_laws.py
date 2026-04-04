@@ -18,6 +18,9 @@ SAFETY_KEYWORDS = [
     "추락방지", "화학물질", "유해위험", "작업환경",
     "건설안전", "안전검사", "유해인자", "안전교육",
     "보건규칙", "안전규칙", "근로자건강", "안전점검",
+    "안전수칙", "안전기준", "안전조치", "산업보건",
+    "직업병", "근골격계", "소음", "진동", "분진",
+    "중대재해", "중대산업재해", "PSM", "공정안전",
 ]
 
 # 수집 대상 종류
@@ -45,56 +48,100 @@ def is_safety_related(title):
 
 # ── 날짜 포맷 변환 ────────────────────────────────────
 def format_date(raw):
-    raw = str(raw).strip()
+    raw = str(raw).strip().replace("-", "").replace(".", "")
     if len(raw) >= 8:
         return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
     return raw
 
-# ── 법제처 API 호출 ───────────────────────────────────
-def fetch_law_list(type_code, page=1):
-    params = {
-        "OC": OC,
-        "target": "ordin",
-        "type": "XML",
-        "display": 20,
-        "page": page,
-        "ordinType": type_code,
-        "org": "고용노동부",
-    }
-    try:
-        res = requests.get(BASE_URL, params=params, timeout=15)
-        res.encoding = "utf-8"
-        root = ET.fromstring(res.text)
-        items = root.findall(".//ordin") or root.findall(".//law")
-        return items
-    except Exception as e:
-        print(f"  ❌ API 호출 오류: {e}")
-        return []
+# ── XML에서 값 추출 (다양한 태그명 지원) ──────────────
+def get_text(item, *tags):
+    for tag in tags:
+        el = item.find(tag)
+        if el is not None and el.text:
+            return el.text.strip()
+    return ""
+
+# ── 법제처 API 호출 (여러 페이지) ─────────────────────
+def fetch_law_list(type_code, max_pages=5):
+    all_items = []
+    for page in range(1, max_pages + 1):
+        params = {
+            "OC": OC,
+            "target": "ordin",
+            "type": "XML",
+            "display": 20,
+            "page": page,
+            "ordinType": type_code,
+            "org": "고용노동부",
+        }
+        try:
+            res = requests.get(BASE_URL, params=params, timeout=15)
+            res.encoding = "utf-8"
+            print(f"    페이지 {page} 응답: {res.status_code}")
+
+            root = ET.fromstring(res.text)
+
+            # 다양한 태그명 시도
+            items = (root.findall(".//ordin") or
+                     root.findall(".//law") or
+                     root.findall(".//item") or
+                     root.findall(".//OrdinInfo") or
+                     list(root))
+
+            print(f"    → {len(items)}개 항목 (태그: {items[0].tag if items else 'none'})")
+
+            if not items:
+                break
+
+            all_items.extend(items)
+
+            # 20개 미만이면 마지막 페이지
+            if len(items) < 20:
+                break
+
+        except Exception as e:
+            print(f"  ❌ API 호출 오류 (페이지 {page}): {e}")
+            break
+
+    return all_items
 
 # ── Firestore 저장 ────────────────────────────────────
 def save_to_firestore(db, item, type_label):
-    def get(tag):
-        el = item.find(tag)
-        return el.text.strip() if el is not None and el.text else ""
+    # 다양한 태그명으로 제목 추출
+    title = get_text(item,
+        "법령명", "ordinNm", "법령명한글", "제목",
+        "조문제목", "title", "name", "NM"
+    )
 
-    title = get("법령명") or get("조문제목") or get("ordinNm")
-    if not title or not is_safety_related(title):
+    if not title:
+        # 모든 하위 태그 출력 (디버깅)
+        print(f"    ⚠️ 제목 없음. 태그목록: {[c.tag for c in item]}")
         return False
 
-    raw_date = get("공포일자") or get("시행일자") or get("promulgationDt") or ""
+    if not is_safety_related(title):
+        return False
+
+    # 날짜 추출
+    raw_date = get_text(item,
+        "공포일자", "시행일자", "promulgationDt",
+        "enforcementDt", "발령일자", "개정일자", "date"
+    )
     raw_date = raw_date.replace("-", "").replace(".", "")
 
-    source_url = get("법령상세링크") or \
-        f"https://www.law.go.kr/ordinInfoP.do?ordinSeq={get('법령ID') or ''}"
-    if not source_url or source_url.endswith("="):
-        source_url = "https://www.moel.go.kr/info/lawinfo/instruction/list.do"
+    # URL 추출
+    law_id = get_text(item, "법령ID", "ordinSeq", "ID", "id")
+    source_url = get_text(item, "법령상세링크", "detailLink", "url", "URL")
+    if not source_url:
+        if law_id:
+            source_url = f"https://www.law.go.kr/ordinInfoP.do?ordinSeq={law_id}"
+        else:
+            source_url = "https://www.moel.go.kr/info/lawinfo/instruction/list.do"
 
     doc_id = f"notice_{raw_date}_{title[:15].replace(' ', '_')}"
 
     # 중복 체크
     existing = db.collection("legal_updates").document(doc_id).get()
     if existing.exists:
-        print(f"  ⏭️  이미 있음: {title}")
         return False
 
     db.collection("legal_updates").document(doc_id).set({
@@ -106,7 +153,7 @@ def save_to_firestore(db, item, type_label):
         "date":       raw_date,
         "postedDate": format_date(raw_date),
         "sourceUrl":  source_url,
-        "summary":    get("조문내용") or "",
+        "summary":    get_text(item, "조문내용", "summary", "content") or "",
         "importance": "normal",
         "updatedAt":  datetime.now(timezone.utc),
     })
@@ -123,9 +170,9 @@ def main():
     total_saved = 0
 
     for law_type in LAW_TYPES:
-        print(f"🔍 [{law_type['label']}] 수집 중...")
+        print(f"\n🔍 [{law_type['label']}] 수집 중...")
         items = fetch_law_list(law_type["code"])
-        print(f"   → {len(items)}개 항목 발견")
+        print(f"   → 총 {len(items)}개 항목 발견")
 
         for item in items:
             saved = save_to_firestore(db, item, law_type["label"])
