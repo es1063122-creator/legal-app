@@ -6,11 +6,9 @@ from datetime import datetime, timezone
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-# ── 설정 ─────────────────────────────────────────────
 OC = os.environ.get("LAW_OC", "es5183")
 BASE_URL = "https://www.law.go.kr/DRF/lawSearch.do"
 
-# 안전 관련 키워드
 SAFETY_KEYWORDS = [
     "산업안전", "안전보건", "재해예방", "산업재해",
     "보호구", "안전활동", "안전지도사", "안전보건지도사",
@@ -23,14 +21,12 @@ SAFETY_KEYWORDS = [
     "중대재해", "중대산업재해", "PSM", "공정안전",
 ]
 
-# 수집 대상 종류
 LAW_TYPES = [
     {"code": "2", "label": "고시"},
     {"code": "3", "label": "예규"},
     {"code": "4", "label": "훈령"},
 ]
 
-# ── Firebase 초기화 ───────────────────────────────────
 def init_firebase():
     cred_json = os.environ.get("FIREBASE_CREDENTIALS")
     if not cred_json:
@@ -40,20 +36,17 @@ def init_firebase():
     firebase_admin.initialize_app(cred)
     return firestore.client()
 
-# ── 안전 키워드 포함 여부 ─────────────────────────────
 def is_safety_related(title):
     if not title:
         return False
     return any(kw in title for kw in SAFETY_KEYWORDS)
 
-# ── 날짜 포맷 변환 ────────────────────────────────────
 def format_date(raw):
     raw = str(raw).strip().replace("-", "").replace(".", "")
     if len(raw) >= 8:
         return f"{raw[:4]}-{raw[4:6]}-{raw[6:8]}"
     return raw
 
-# ── XML에서 값 추출 (다양한 태그명 지원) ──────────────
 def get_text(item, *tags):
     for tag in tags:
         el = item.find(tag)
@@ -61,8 +54,7 @@ def get_text(item, *tags):
             return el.text.strip()
     return ""
 
-# ── 법제처 API 호출 (여러 페이지) ─────────────────────
-def fetch_law_list(type_code, max_pages=5):
+def fetch_and_parse(type_code, max_pages=5):
     all_items = []
     for page in range(1, max_pages + 1):
         params = {
@@ -77,60 +69,90 @@ def fetch_law_list(type_code, max_pages=5):
         try:
             res = requests.get(BASE_URL, params=params, timeout=15)
             res.encoding = "utf-8"
-            print(f"    페이지 {page} 응답: {res.status_code}")
+            raw_xml = res.text
 
-            root = ET.fromstring(res.text)
+            # 첫 페이지 첫 실행 시 XML 구조 출력
+            if page == 1 and type_code == "2":
+                print(f"\n📄 XML 응답 샘플 (처음 1500자):")
+                print(raw_xml[:1500])
+                print("---")
 
-            # 다양한 태그명 시도
-            items = (root.findall(".//ordin") or
-                     root.findall(".//law") or
-                     root.findall(".//item") or
-                     root.findall(".//OrdinInfo") or
-                     list(root))
+            root = ET.fromstring(raw_xml)
 
-            print(f"    → {len(items)}개 항목 (태그: {items[0].tag if items else 'none'})")
+            # root 직접 순회하며 ordin 찾기
+            items = []
+
+            # 방법1: 직접 태그 찾기
+            for tag in ["ordin", "OrdinInfo", "law", "item", "result"]:
+                found = root.findall(f".//{tag}")
+                if found:
+                    items = found
+                    print(f"    태그 '{tag}'로 {len(found)}개 발견")
+                    break
+
+            # 방법2: root의 직계 자식 중 하위가 있는 것
+            if not items:
+                for child in root:
+                    sub = list(child)
+                    if sub:
+                        items.append(child)
+                print(f"    직계 자식에서 {len(items)}개 발견")
+
+            # 방법3: root 자체가 리스트
+            if not items:
+                items = list(root)
+                print(f"    root 자식 {len(items)}개 사용")
 
             if not items:
+                print(f"    ❌ 항목 없음")
                 break
 
-            all_items.extend(items)
+            # 첫 항목 구조 출력
+            if page == 1 and items and type_code == "2":
+                first = items[0]
+                print(f"\n🔍 첫 번째 항목 구조:")
+                print(f"  태그: {first.tag}")
+                print(f"  속성: {first.attrib}")
+                print(f"  텍스트: {repr(first.text)}")
+                for child in first:
+                    print(f"  └ {child.tag}: {repr(child.text)}")
+                    for sub in child:
+                        print(f"    └ {sub.tag}: {repr(sub.text)}")
 
-            # 20개 미만이면 마지막 페이지
+            all_items.extend(items)
             if len(items) < 20:
                 break
 
         except Exception as e:
-            print(f"  ❌ API 호출 오류 (페이지 {page}): {e}")
+            print(f"  ❌ 오류: {e}")
             break
 
     return all_items
 
-# ── Firestore 저장 ────────────────────────────────────
 def save_to_firestore(db, item, type_label):
-    # 다양한 태그명으로 제목 추출
-    title = get_text(item,
-        "법령명", "ordinNm", "법령명한글", "제목",
-        "조문제목", "title", "name", "NM"
-    )
+    # 속성에서 값 추출 시도
+    title = (item.attrib.get("법령명") or
+             item.attrib.get("ordinNm") or
+             item.attrib.get("title") or
+             get_text(item, "법령명", "ordinNm", "제목", "title", "name",
+                      "조문제목", "NM", "lawNm", "lawName"))
 
     if not title:
-        # 모든 하위 태그 출력 (디버깅)
-        print(f"    ⚠️ 제목 없음. 태그목록: {[c.tag for c in item]}")
+        # 텍스트 직접 사용
+        if item.text and item.text.strip():
+            title = item.text.strip()
+
+    if not title or not is_safety_related(title):
         return False
 
-    if not is_safety_related(title):
-        return False
-
-    # 날짜 추출
-    raw_date = get_text(item,
-        "공포일자", "시행일자", "promulgationDt",
-        "enforcementDt", "발령일자", "개정일자", "date"
-    )
+    raw_date = (item.attrib.get("공포일자", "") or
+                get_text(item, "공포일자", "시행일자", "promulgationDt",
+                         "enforcementDt", "발령일자", "개정일자"))
     raw_date = raw_date.replace("-", "").replace(".", "")
 
-    # URL 추출
-    law_id = get_text(item, "법령ID", "ordinSeq", "ID", "id")
-    source_url = get_text(item, "법령상세링크", "detailLink", "url", "URL")
+    law_id = (item.attrib.get("법령ID", "") or
+              get_text(item, "법령ID", "ordinSeq", "ID"))
+    source_url = get_text(item, "법령상세링크", "detailLink", "url")
     if not source_url:
         if law_id:
             source_url = f"https://www.law.go.kr/ordinInfoP.do?ordinSeq={law_id}"
@@ -138,8 +160,6 @@ def save_to_firestore(db, item, type_label):
             source_url = "https://www.moel.go.kr/info/lawinfo/instruction/list.do"
 
     doc_id = f"notice_{raw_date}_{title[:15].replace(' ', '_')}"
-
-    # 중복 체크
     existing = db.collection("legal_updates").document(doc_id).get()
     if existing.exists:
         return False
@@ -157,10 +177,9 @@ def save_to_firestore(db, item, type_label):
         "importance": "normal",
         "updatedAt":  datetime.now(timezone.utc),
     })
-    print(f"  ✅ 저장: [{type_label}] {title} ({format_date(raw_date)})")
+    print(f"  ✅ [{type_label}] {title} ({format_date(raw_date)})")
     return True
 
-# ── 메인 ─────────────────────────────────────────────
 def main():
     print("🚀 세이프로 - 법제처 안전 법령 자동 수집 시작")
     print(f"   OC: {OC}")
@@ -171,12 +190,11 @@ def main():
 
     for law_type in LAW_TYPES:
         print(f"\n🔍 [{law_type['label']}] 수집 중...")
-        items = fetch_law_list(law_type["code"])
-        print(f"   → 총 {len(items)}개 항목 발견")
+        items = fetch_and_parse(law_type["code"])
+        print(f"   → 총 {len(items)}개 항목")
 
         for item in items:
-            saved = save_to_firestore(db, item, law_type["label"])
-            if saved:
+            if save_to_firestore(db, item, law_type["label"]):
                 total_saved += 1
 
     print(f"\n🎉 완료! 총 {total_saved}개 새 항목 저장됨")
