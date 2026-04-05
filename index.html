@@ -676,33 +676,43 @@ function appendMessage(role, html, lawCards) {
     ? '<div class="msg-avatar"><img src="' + BOT_BASE + 'dj-ai-' + currentEmotion + '.png" alt="동진이"></div>'
     : '<div class="msg-avatar">👷</div>';
 
-  let cardsHtml = '';
-  if (Array.isArray(lawCards) && lawCards.length > 0) {
-    cardsHtml = '<div class="law-search-btns">' +
-      '<div class="law-search-label">📋 관련 법령 검색</div>' +
-      lawCards.map(function(kw) {
-        return '<button class="law-search-btn" onclick="searchInApp(' + JSON.stringify(kw) + ')">' +
-          '🔍 ' + escapeHtml_(kw) + '</button>';
-      }).join('') +
-    '</div>';
-  }
+ let cardsHtml = '';
+if (Array.isArray(lawCards) && lawCards.length > 0) {
+  cardsHtml = '<div class="law-search-btns">' +
+    '<div class="law-search-label">📋 관련 법령 검색</div>' +
+    lawCards.map(function(kw) {
+      return '<button class="law-search-btn" data-law="' + escapeHtml_(kw) + '">' +
+        '🔍 ' + escapeHtml_(kw) + '</button>';
+    }).join('') +
+  '</div>';
+}	
 
   const name = role === 'bot'
     ? '동진이 <span class="industry-badge">' + cfg.emoji + ' ' + cfg.name + '</span>'
     : roleName;
 
   wrap.innerHTML = `
-    ${avatarHtml}
-    <div class="msg-content">
-      <span class="msg-name">${name}</span>
-      <div class="msg-bubble">${html}</div>
-      ${cardsHtml}
-      <div class="msg-time">${nowTime()}</div>
-    </div>
-  `;
+  ${avatarHtml}
+  <div class="msg-content">
+    <span class="msg-name">${name}</span>
+    <div class="msg-bubble">${html}</div>
+    ${cardsHtml}
+    <div class="msg-time">${nowTime()}</div>
+  </div>
+`;
 
-  messages.appendChild(wrap);
-  messages.scrollTop = messages.scrollHeight;
+const searchBtns = wrap.querySelectorAll('.law-search-btn');
+searchBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    const lawName = btn.getAttribute('data-law');
+    if (lawName) {
+      searchInApp(lawName);
+    }
+  });
+});
+
+messages.appendChild(wrap);
+messages.scrollTop = messages.scrollHeight;
 }
 
 function showTyping() {
