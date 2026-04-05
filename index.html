@@ -14,7 +14,11 @@
       --text: #1e293b;
       --muted: #64748b;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * {
+      margin:0; padding:0; box-sizing:border-box;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
     body {
       font-family: 'Nanum Gothic', sans-serif;
       background: var(--bg);
@@ -625,8 +629,17 @@ function showAnalysisTypeDialog() {
 
 /* ── 앱 법령찾기로 검색 ── */
 function searchInApp(lawName) {
-  if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
-    window.FlutterBridge.postMessage('search:' + lawName);
+  console.log('searchInApp 호출:', lawName);
+  try {
+    if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
+      window.FlutterBridge.postMessage('search:' + lawName);
+      console.log('FlutterBridge 전송 성공:', 'search:' + lawName);
+    } else {
+      console.log('FlutterBridge 없음 - 일반 브라우저');
+      alert('법령찾기: ' + lawName);
+    }
+  } catch(e) {
+    console.error('searchInApp 오류:', e);
   }
 }
 
