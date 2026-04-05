@@ -174,6 +174,36 @@
       font-weight: 900;
       text-decoration: none;
     }
+    .law-search-btns {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .law-search-label {
+      width: 100%;
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+    .law-search-btn {
+      margin-top: 0px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff7ed;
+      border: 1.5px solid #fed7aa;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #c2410c;
+      cursor: pointer;
+      font-family: 'Nanum Gothic', sans-serif;
+      transition: all .15s;
+    }
+    .law-search-btn:hover { background: #ea580c; color: #fff; border-color: #ea580c; }
 
     .photo-bar {
       display: flex;
@@ -410,7 +440,7 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxToMz0zxVBJ47JJZvtZsmt4pPhwMUAGaT5X1GXQOWfIdzjJ1It84BXDpj7dCI6gWs6/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWbYAmFw_s7vNKbwr1eSludmgwc1A5DandFS3_bqT1H7N7vmqnYcAvT_mgoE-WDU0h/exec';
 const BOT_BASE = 'https://raw.githubusercontent.com/es1063122-creator/legal-app/main/';
 
 const INDUSTRY_CONFIG = {
@@ -440,12 +470,12 @@ const INDUSTRY_CONFIG = {
     name: '서비스업',
     emoji: '🏨',
     tabs: [
-      { label: '산안법', questions: ['서비스업 안전관리자 선임은?', '소규모 사업장 안전기준은?', '고객응대 근로자 보호는?'] },
-      { label: '중대재해법', questions: ['서비스업 중대재해 적용은?', '소규모 사업장 적용 기준은?', '안전보건계획 수립 의무는?'] },
-      { label: '업종별', questions: ['병원 안전관리 기준은?', '호텔 화재안전 기준은?', '마트 적재물 안전기준은?'] }
+      { label: '산안법', questions: ['서비스업 안전관리자 선임 기준은?', '고객응대 근로자 보호조치는?', '감정노동자 보호 기준은?'] },
+      { label: '중대재해법', questions: ['서비스업 중대재해 적용 기준은?', '공중이용시설 안전의무는?', '안전보건관리체계 구축은?'] },
+      { label: '업종별', questions: ['병원 의료폐기물 안전관리는?', '호텔 화재·피난 안전기준은?', '마트·대형매장 적재 안전기준은?', '주방 가스·화재 안전기준은?'] }
     ],
-    quickBtns: ['고객응대 보호', '소규모 안전기준', '화재안전 기준', '미끄럼 방지'],
-    prompts: ['고객응대 근로자 보호 조치 기준은?', '소규모 서비스업 안전관리 기준은?', '병원·호텔 화재안전 기준은?', '마트 적재물 안전관리 기준은?']
+    quickBtns: ['병원 안전기준', '호텔 화재안전', '마트 적재안전', '고객응대 보호'],
+    prompts: ['병원 의료폐기물 및 안전관리 기준은?', '호텔 화재·피난 안전기준은?', '마트·대형매장 적재물 안전기준은?', '고객응대 근로자 보호조치 기준은?']
   },
   logistics: {
     name: '물류·유통',
@@ -589,6 +619,13 @@ function showAnalysisTypeDialog() {
   });
 }
 
+/* ── 앱 법령찾기로 검색 ── */
+function searchInApp(lawName) {
+  if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
+    window.FlutterBridge.postMessage('search:' + lawName);
+  }
+}
+
 function setEmotion(type) {
   currentEmotion = type || 'default';
   BOT_FACE.src = BOT_BASE + 'dj-ai-' + currentEmotion + '.png';
@@ -623,16 +660,13 @@ function appendMessage(role, html, lawCards) {
 
   let cardsHtml = '';
   if (Array.isArray(lawCards) && lawCards.length > 0) {
-    cardsHtml = '<div class="law-cards">' + lawCards.map(function(c) {
-      return `
-        <div class="law-card">
-          <span class="law-card-badge">📋 관련법령</span>
-          <div class="law-card-title">${escapeHtml_(c.name || '')}</div>
-          ${c.desc ? `<div class="law-card-desc">${escapeHtml_(c.desc)}</div>` : ''}
-          ${c.url ? `<a class="law-card-link" href="${c.url}" target="_blank" rel="noopener">🔗 법령 전문 보기 →</a>` : ''}
-        </div>
-      `;
-    }).join('') + '</div>';
+    cardsHtml = '<div class="law-search-btns">' +
+      '<div class="law-search-label">📋 관련 법령 검색</div>' +
+      lawCards.map(function(kw) {
+        return '<button class="law-search-btn" onclick="searchInApp(' + JSON.stringify(kw) + ')">' +
+          '🔍 ' + escapeHtml_(kw) + '</button>';
+      }).join('') +
+    '</div>';
   }
 
   const name = role === 'bot'
@@ -760,10 +794,10 @@ async function analyzePhoto(inputEl) {
       hideTyping();
 
       const reply = data.reply || data.answer || '분석 결과를 받아오지 못했습니다.';
-      const laws = Array.isArray(data.laws) ? data.laws : [];
+      const keywords = Array.isArray(data.searchKeywords) ? data.searchKeywords : [];
 
       applyEmotionByText(reply);
-      appendMessage('bot', toReportStyleHtml_(reply), laws);
+      appendMessage('bot', toReportStyleHtml_(reply), keywords);
 
       conversationHistory.push({
         role: 'assistant',
@@ -837,11 +871,11 @@ async function sendMessage() {
     }
 
     const reply = data.reply || data.answer;
-    const laws = Array.isArray(data.laws) ? data.laws : [];
+    const keywords = Array.isArray(data.searchKeywords) ? data.searchKeywords : [];
 
     applyEmotionByText(reply);
     conversationHistory.push({ role: 'assistant', content: reply });
-    appendMessage('bot', toReportStyleHtml_(reply), laws);
+    appendMessage('bot', toReportStyleHtml_(reply), keywords);
 
   } catch (err) {
     hideTyping();
