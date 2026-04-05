@@ -798,7 +798,12 @@ async function analyzePhoto(inputEl) {
       hideTyping();
 
       const reply = data.reply || data.answer || '분석 결과를 받아오지 못했습니다.';
-      const keywords = Array.isArray(data.searchKeywords) ? data.searchKeywords : [];
+      let keywords = [];
+      if (Array.isArray(data.searchKeywords) && data.searchKeywords.length > 0) {
+        keywords = data.searchKeywords;
+      } else if (Array.isArray(data.laws) && data.laws.length > 0) {
+        keywords = data.laws.map(function(l) { return l.name || ''; }).filter(Boolean);
+      }
 
       applyEmotionByText(reply);
       appendMessage('bot', toReportStyleHtml_(reply), keywords);
@@ -875,7 +880,13 @@ async function sendMessage() {
     }
 
     const reply = data.reply || data.answer;
-    const keywords = Array.isArray(data.searchKeywords) ? data.searchKeywords : [];
+    // searchKeywords 우선, 없으면 laws에서 name 추출
+    let keywords = [];
+    if (Array.isArray(data.searchKeywords) && data.searchKeywords.length > 0) {
+      keywords = data.searchKeywords;
+    } else if (Array.isArray(data.laws) && data.laws.length > 0) {
+      keywords = data.laws.map(function(l) { return l.name || ''; }).filter(Boolean);
+    }
 
     applyEmotionByText(reply);
     conversationHistory.push({ role: 'assistant', content: reply });
