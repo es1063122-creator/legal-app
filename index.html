@@ -3,46 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>동진이 - 안전관리 AI 어시스턴트</title>
+  <title>KDH AI 법령봇</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet" />
+
   <style>
     :root {
       --orange: #ea580c;
+      --orange-light: #fb923c;
+      --yellow: #f59e0b;
+
+      /* 동진 톤 */
       --navy: #0b1b3b;
-      --bg: #f8fafc;
+      --navy2:#1c2b3a;
+
+      --bg: #ffffff;     /* ✅ 배경 제거: 전체 흰색 */
       --panel: #ffffff;
+      --gray: #e5e7eb;
+
       --text: #1e293b;
       --muted: #64748b;
+
+      --shadow: 0 26px 70px rgba(0,0,0,0.18);
+      --radius: 22px;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Nanum Gothic', sans-serif;
       background: var(--bg);
       color: var(--text);
-      height: 100vh;
-      overflow: hidden;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding: 0;
     }
 
+    /* ✅ 전체화면 */
     .chat-panel {
       width: 100vw;
       height: 100vh;
+      max-height: 100vh;
       background: var(--panel);
+      border-radius: 0;
+      box-shadow: none;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      border: none;
     }
 
+    /* ✅ 헤더 제거 - 앱에서 숨김 */
+    .chat-header {
+      display: none;
+    }
+
+    .chat-header-name {
+      font-family: 'Gmarket Sans', sans-serif;
+      color: #fff;
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing:-0.2px;
+      text-align:center;
+    }
+    .chat-header-sub {
+      color: #fb923c;
+      font-size: 0.74rem;
+      margin-top: 2px;
+      font-weight: 700;
+      text-align:center;
+    }
+
+    .chat-header-status {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    .status-txt {
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    .chat-close {
+      position:absolute;
+      right: 14px;
+      top: 14px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      color: #94a3b8;
+      font-size: 1rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: all .18s;
+    }
+    .chat-close:hover {
+      background: rgba(234,88,12,0.18);
+      color: #fb923c;
+      transform: scale(1.05);
+    }
+
+    /* 탭 */
     .law-tabs {
       display: flex;
       overflow-x: auto;
+      gap: 0;
       background: #f8fafc;
       border-bottom: 1px solid #e5e7eb;
       flex-shrink: 0;
       padding: 0 6px;
     }
     .law-tabs::-webkit-scrollbar { height: 0; }
+
     .law-tab {
-      padding: 10px 13px;
+      padding: 10px 12px;
       font-size: 0.74rem;
       font-weight: 900;
       white-space: nowrap;
@@ -57,58 +144,72 @@
     .law-tab:hover { color: var(--orange); }
     .law-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
 
+    /* 메시지 */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
+      display:flex;
+      flex-direction:column;
       gap: 14px;
       background: #f8fafc;
-      scroll-behavior: smooth;
+      scroll-behavior:smooth;
     }
-    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar { width: 5px; }
     .chat-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
 
     .msg { display:flex; gap: 10px; align-items:flex-end; }
     .msg.user { flex-direction: row-reverse; }
 
-    .msg-avatar {
-      background: none;
-      box-shadow: none;
-      width: 70px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .msg-avatar img {
-      width: 80px;
-      height: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.20));
-      transition: transform .2s ease;
-    }
-    .msg.bot .msg-avatar img { transform: scale(1.05); }
-    .msg.user .msg-avatar {
+    /* ✅ 캐릭터 작게 - 채팅창 확보 */
+.msg-avatar{
+  background:none;
+  box-shadow:none;
+  width:70px;              /* 🔥 영역 축소 */
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  flex-shrink:0;
+}
+
+.msg-avatar img{
+  width:80px;              /* 🔥 캐릭터 작게 */
+  height:auto;
+  object-fit:contain;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,.20));
+  transition: transform .2s ease;
+}
+
+/* 말할 때 살짝 확대 효과 */
+.msg.bot .msg-avatar img{
+  transform: scale(1.05);
+}
+    .msg.user .msg-avatar{
       width: 36px;
       height: 36px;
       border-radius: 12px;
       background: #e5e7eb;
-      color: #111827;
+      color:#111827;
+      box-shadow:none;
       font-size: 0.95rem;
       font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
     .msg-content { max-width: 80%; display:flex; flex-direction:column; gap: 5px; }
-    .msg.user .msg-content { align-items: flex-end; }
-    .msg-name { font-size: 0.70rem; font-weight: 900; color: #6b7280; }
+    .msg.user .msg-content { align-items:flex-end; }
+
+    .msg-name {
+      font-size: 0.70rem;
+      font-weight: 900;
+      color:#6b7280;
+      letter-spacing:-0.2px;
+    }
 
     .msg-bubble {
-      position: relative;
+      position: relative; /* ✅ 꼬리 위치 기준 */
       padding: 12px 14px;
       border-radius: 16px;
       font-size: 0.90rem;
@@ -116,204 +217,49 @@
       word-break: keep-all;
       box-shadow: 0 10px 22px rgba(0,0,0,0.06);
     }
+
     .msg.bot .msg-bubble {
-      background: #ffffff;
+      background:#ffffff;
       color: var(--text);
       border-bottom-left-radius: 4px;
       border: 1px solid rgba(15,23,42,0.06);
     }
-    .msg.bot .msg-bubble::after {
-      content: "";
-      position: absolute;
-      left: -10px;
-      top: 18px;
-      border-width: 8px;
-      border-style: solid;
-      border-color: transparent #ffffff transparent transparent;
+    /* ✅ 봇 말풍선 꼬리 */
+    .msg.bot .msg-bubble::after{
+      content:"";
+      position:absolute;
+      left:-10px;
+      top:18px;
+      border-width:8px;
+      border-style:solid;
+      border-color:transparent #ffffff transparent transparent;
     }
+
     .msg.user .msg-bubble {
       background: linear-gradient(135deg, #c2410c, #ea580c);
-      color: #fff;
+      color:#fff;
       border-bottom-right-radius: 4px;
       box-shadow: 0 12px 24px rgba(234,88,12,0.20);
     }
-    .msg.user .msg-bubble::after {
-      content: "";
-      position: absolute;
-      right: -10px;
-      top: 18px;
-      border-width: 8px;
-      border-style: solid;
-      border-color: transparent transparent transparent #ea580c;
-    }
-    .msg-time { font-size: 0.68rem; color: #9ca3af; padding: 0 4px; font-weight: 800; }
-
-    .law-cards { display:flex; flex-direction:column; gap: 8px; margin-top: 8px; }
-    .law-card {
-      background: #fff;
-      border: 1px solid #fed7aa;
-      border-left: 4px solid var(--orange);
-      border-radius: 12px;
-      padding: 10px 12px;
-    }
-    .law-card-badge {
-      display: inline-block;
-      background: rgba(234,88,12,0.10);
-      color: var(--orange);
-      font-size: 0.70rem;
-      font-weight: 900;
-      padding: 2px 8px;
-      border-radius: 999px;
-      margin-bottom: 6px;
-    }
-    .law-card-title { font-size: 0.82rem; font-weight: 900; color: #1e293b; margin-bottom: 4px; }
-    .law-card-desc { font-size: 0.78rem; color: #64748b; line-height: 1.5; margin-bottom: 6px; }
-    .law-card-link {
-      font-size: 0.75rem;
-      color: var(--orange);
-      font-weight: 900;
-      text-decoration: none;
+    /* ✅ 유저 말풍선 꼬리 */
+    .msg.user .msg-bubble::after{
+      content:"";
+      position:absolute;
+      right:-10px;
+      top:18px;
+      border-width:8px;
+      border-style:solid;
+      border-color:transparent transparent transparent #ea580c;
     }
 
-    .photo-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: #fff7ed;
-      border-top: 1px solid #fed7aa;
-      flex-shrink: 0;
-    }
-    .photo-label {
-      font-size: 0.75rem;
-      font-weight: 900;
-      color: #c2410c;
-    }
-    .photo-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #ea580c;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 7px 14px;
-      font-size: 0.78rem;
-      font-weight: 900;
-      cursor: pointer;
-      font-family: 'Nanum Gothic', sans-serif;
-    }
-    .photo-btn:hover { opacity: 0.88; }
-    #photoFileInput { display: none; }
-
-    .photo-preview {
-      max-width: 200px;
-      max-height: 160px;
-      border-radius: 12px;
-      object-fit: cover;
-      border: 2px solid #fed7aa;
-      margin-top: 6px;
+    .msg-time {
+      font-size: 0.68rem;
+      color:#9ca3af;
+      padding: 0 4px;
+      font-weight: 800;
     }
 
-    .industry-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(234,88,12,0.10);
-      border: 1px solid rgba(234,88,12,0.25);
-      color: #c2410c;
-      font-size: 0.72rem;
-      font-weight: 900;
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-left: 8px;
-    }
-
-    .chat-input-area {
-      display: flex;
-      align-items: flex-end;
-      gap: 10px;
-      padding: 10px 12px;
-      background: #fff;
-      border-top: 1px solid #e5e7eb;
-      flex-shrink: 0;
-    }
-    .chat-input {
-      flex: 1;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 10px 14px;
-      font-size: 0.90rem;
-      font-family: 'Nanum Gothic', sans-serif;
-      color: var(--text);
-      resize: none;
-      outline: none;
-      line-height: 1.5;
-      max-height: 120px;
-      overflow-y: auto;
-      transition: border-color 0.15s;
-    }
-    .chat-input:focus { border-color: var(--orange); }
-    .send-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 13px;
-      background: linear-gradient(135deg, #c2410c, #ea580c);
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      box-shadow: 0 6px 16px rgba(234,88,12,0.28);
-      transition: opacity .18s, transform .14s;
-    }
-    .send-btn:hover { opacity: .92; transform: scale(1.05); }
-    .send-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-
-    .typing-indicator { display:flex; gap:5px; padding:10px 14px; }
-    .typing-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #94a3b8;
-      animation: typingBounce 1.2s ease-in-out infinite;
-    }
-    .typing-dot:nth-child(2) { animation-delay: .2s; }
-    .typing-dot:nth-child(3) { animation-delay: .4s; }
-    @keyframes typingBounce {
-      0%,80%,100% { transform: translateY(0); }
-      40% { transform: translateY(-8px); }
-    }
-
-    .quick-btns { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
-    .quick-btn {
-      background: #fff7ed;
-      border: 1.5px solid #fed7aa;
-      border-radius: 999px;
-      padding: 6px 13px;
-      font-size: 0.78rem;
-      font-weight: 900;
-      color: #c2410c;
-      cursor: pointer;
-      font-family: 'Nanum Gothic', sans-serif;
-      transition: all .15s;
-    }
-    .quick-btn:hover { background: #ea580c; color: #fff; border-color: #ea580c; }
-
-    .disclaimer {
-      background: #fff7ed;
-      border-top: 1px solid #fed7aa;
-      padding: 4px 10px;
-      font-size: 0.60rem;
-      color: #92400e;
-      text-align: center;
-      flex-shrink: 0;
-      font-weight: 700;
-      line-height: 1.4;
-    }
-
+    /* 실무보고형 섹션 */
     .ai-section {
       margin-top: 10px;
       padding: 10px 12px;
@@ -323,273 +269,375 @@
       font-size: 0.82rem;
       border: 1px solid rgba(234,88,12,0.18);
     }
-    .ai-title { font-weight: 900; color: #c2410c; margin-bottom: 6px; }
-    .hint { color: #334155; font-weight: 800; }
+    .ai-title {
+      font-weight: 900;
+      color: #c2410c;
+      margin-bottom: 6px;
+      letter-spacing:-0.2px;
+    }
+    .penalty { color:#dc2626; font-weight: 900; }
+    .fine { color:#ea580c; font-weight: 900; }
+    .hint { color:#334155; font-weight: 800; }
+
+    /* 법령 카드 */
+    .law-cards { display:flex; flex-direction:column; gap: 8px; margin-top: 8px; }
+    .law-card {
+      background:#fff;
+      border:1px solid #fed7aa;
+      border-left:4px solid var(--orange);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .law-card-badge {
+      display:inline-block;
+      background: rgba(234,88,12,0.10);
+      color: var(--orange);
+      font-size: 0.70rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+    .law-card-title {
+      font-weight: 900;
+      color: var(--navy);
+      font-size: 0.86rem;
+      margin-bottom: 4px;
+    }
+    .law-card-desc {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.80rem;
+      font-weight: 700;
+    }
+    .law-card-link {
+      display:inline-block;
+      margin-top: 7px;
+      color: var(--orange);
+      font-weight: 900;
+      text-decoration: none;
+      font-size: 0.80rem;
+    }
+    .law-card-link:hover { text-decoration: underline; }
+
+    /* 타이핑 */
+    .typing-indicator {
+      display:flex;
+      gap: 6px;
+      padding: 12px 14px;
+      background:#ffffff;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(15,23,42,0.06);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #fb923c;
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: .2s; }
+    .typing-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-7px)} }
+
+    /* 퀵버튼 */
+    .quick-btns { display:flex; flex-wrap:wrap; gap: 6px; margin-top: 10px; }
+    .quick-btn{
+      background:#fff7ed;
+      color:#c2410c;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.74rem;
+      cursor:pointer;
+      font-weight: 900;
+      transition: all .14s;
+    }
+    .quick-btn:hover{
+      background: var(--orange);
+      color:#fff;
+      border-color: var(--orange);
+      transform: translateY(-1px);
+    }
+
+    /* 입력 */
+    .chat-input-area{
+      padding: 12px 14px;
+      border-top: 1px solid #e5e7eb;
+      background:#ffffff;
+      display:flex;
+      gap: 10px;
+      align-items:flex-end;
+      flex-shrink:0;
+    }
+    .chat-input{
+      flex:1;
+      border: 1.6px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      font-family: 'Nanum Gothic', sans-serif;
+      resize:none;
+      outline:none;
+      max-height: 120px;
+      line-height: 1.55;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .chat-input:focus{
+      border-color: var(--orange);
+      box-shadow: 0 0 0 4px rgba(234,88,12,0.10);
+    }
+    .send-btn{
+      width: 46px; height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #c2410c, #ea580c);
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition: opacity .18s, transform .14s;
+      flex-shrink:0;
+      box-shadow: 0 8px 18px rgba(234,88,12,0.28);
+    }
+    .send-btn:hover { opacity: .92; transform: scale(1.05); }
+    .send-btn:disabled { opacity: .45; cursor:not-allowed; transform:none; }
+
+    /* 면책 - 작게 */
+    .disclaimer{
+      background:#fff7ed;
+      border-top: 1px solid #fed7aa;
+      padding: 4px 10px;
+      font-size: 0.60rem;
+      color:#92400e;
+      text-align:center;
+      flex-shrink:0;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 560px){
+      .chat-panel{
+        width: calc(100vw - 24px);
+        height: calc(100vh - 24px);
+        max-height: none;
+      }
+    }
   </style>
 </head>
+
 <body>
-<div class="chat-panel" id="chatPanel">
 
-  <div class="law-tabs" id="lawTabs">
-    <button class="law-tab active" onclick="setTab(this, 'all')">전체</button>
-    <button class="law-tab" onclick="setTab(this, '산안법')">산안법</button>
-    <button class="law-tab" onclick="setTab(this, '중대재해법')">중대재해법</button>
-    <button class="law-tab" onclick="setTab(this, '업종별')">업종별</button>
-    <button class="law-tab" onclick="setTab(this, 'photo')">📷 사진분석</button>
-  </div>
+  <div class="chat-panel" id="chatPanel">
 
-  <div class="chat-messages" id="chatMessages">
-    <div class="msg bot">
-      <div class="msg-avatar">
-        <img class="bot-img" id="botFace"
-             src="https://raw.githubusercontent.com/es1063122-creator/legal-app/main/dj-ai-default.png"
-             alt="동진이">
-      </div>
-      <div class="msg-content">
-        <span class="msg-name">동진이 <span class="industry-badge" id="industryBadge">🏗 건설업</span></span>
-        <div class="msg-bubble">
-          안녕하세요! 👋<br>
-          저는 <strong>안전관리 AI 어시스턴트 동진이</strong>예요.<br>
-          업종과 직책에 맞게 안전 법령을 안내해드릴게요!
-          <div class="quick-btns" id="quickBtns">
-            <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
-            <button class="quick-btn" onclick="sendQuick('위험성평가 실시 의무는?')">위험성평가</button>
-            <button class="quick-btn" onclick="sendQuick('중대재해처벌법 적용 대상은?')">중대재해법</button>
-            <button class="quick-btn" onclick="sendQuick('산재 발생 시 사업주 의무는?')">산재 보고</button>
-          </div>
+    <!-- ✅ 헤더 (flying 제거 + 중앙정렬) -->
+    <div class="chat-header">
+      <div style="flex:1; text-align:center;">
+        <div class="chat-header-name">KDH AI 법령봇</div>
+        <div class="chat-header-sub">산안법 · 중처법 · 건기법 · 현장 실무 기준</div>
+        <div class="chat-header-status">
+          <span class="status-dot"></span>
+          <span class="status-txt" id="statusText">KDH-safety</span>
         </div>
-        <div class="msg-time">지금</div>
+      </div>
+
+    </div>
+
+    <!-- 카테고리 탭 -->
+    <div class="law-tabs">
+      <button class="law-tab active" onclick="setTab(this, [])">전체</button>
+      <button class="law-tab" onclick="setTab(this, ['안전관리자 선임 기준이 어떻게 되나요?','위험성평가 실시 의무가 있나요?','추락 방지 법적 기준은?'])">산안법</button>
+      <button class="law-tab" onclick="setTab(this, ['중대재해처벌법 적용 대상은?','경영책임자 의무는?','중대산업재해 발생 시 처벌은?'])">중대재해법</button>
+      <button class="law-tab" onclick="setTab(this, ['안전관리계획서 제출 대상은?','건설기술진흥법 안전점검 종류는?','발주청 안전의무는?'])">건기진흥법</button>
+      <button class="law-tab" onclick="setTab(this, ['비계 작업발판 폭 기준은?','개구부 덮개/난간 설치기준은?','밀폐공간 측정/환기 기준은?'])">현장안전</button>
+      <button class="law-tab" onclick="setTab(this, ['산재 인정 기준은?','출퇴근 재해도 산재인가요?','산재 보고 의무는?'])">산재보험</button>
+    </div>
+
+    <!-- 메시지 영역 -->
+    <div class="chat-messages" id="chatMessages">
+      <!-- 환영 메시지 -->
+      <div class="msg bot">
+        <div class="msg-avatar">
+          <img class="bot-img" id="botFace"
+               src="https://raw.githubusercontent.com/es1063122-creator/ai-bot/main/dj-ai-default.png"
+               alt="bot">
+        </div>
+        <div class="msg-content">
+          <span class="msg-name">도우미</span>
+          <div class="msg-bubble">
+            안녕하세요! 👋<br>
+            저는 <strong>안전 법령 전문 AI 도우미</strong>예요.<br>
+            궁금한 법령을 물어보시면, 관련 근거(조문/별표)를 찾아서
+            <strong>실무 적용 중심</strong>으로 쉽게 정리해드릴게요.
+            <div class="quick-btns" id="quickBtns">
+              <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
+              <button class="quick-btn" onclick="sendQuick('중대재해처벌법 적용 대상은?')">중대재해 적용</button>
+              <button class="quick-btn" onclick="sendQuick('추락 방지 안전조치 기준은?')">추락방지</button>
+              <button class="quick-btn" onclick="sendQuick('밀폐공간 작업 시 법적 수칙은?')">밀폐공간</button>
+              <button class="quick-btn" onclick="sendQuick('위험성평가 실시 의무가 있나요?')">위험성평가</button>
+              <button class="quick-btn" onclick="sendQuick('산재 발생 시 사업주 의무/보고는?')">산재 보고</button>
+            </div>
+          </div>
+          <div class="msg-time">지금</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="photo-bar" id="photoBar" style="display:none;">
-    <span class="photo-label">📷 현장 사진으로 위험성 분석</span>
-    <button class="photo-btn" type="button" onclick="document.getElementById('photoFileInput').click()">
-      📸 사진 선택
-    </button>
-    <input type="file" id="photoFileInput" accept="image/*" onchange="analyzePhoto(this)">
-  </div>
+    <!-- 입력 -->
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="예) 난간대 높이 기준은? / 안전관리자 선임은? / 과태료는?" rows="1"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="보내기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
 
-  <div class="chat-input-area">
-    <textarea class="chat-input" id="chatInput"
-      placeholder="안전 법령, 현장 안전기준 등 무엇이든 물어보세요!" rows="1"></textarea>
-    <button class="send-btn" id="sendBtn" type="button" onclick="sendMessage()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13"></line>
-        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-      </svg>
-    </button>
-  </div>
+    <div class="disclaimer">
+      ⚠️ 법적 효력이 있는 전문 법률 조언이 아닙니다. 중요 사안은 전문가(노무사/변호사/공단)와 확인하세요.
+    </div>
 
-  <div class="disclaimer">
-    ⚠️ 법적 효력이 있는 전문 법률 조언이 아닙니다. 중요 사안은 전문가(노무사/변호사/공단)와 확인하세요.
   </div>
-</div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNmCoAtxJCXcuJlwKmeZfx42h1Yikgw-9YckzRyE5xUbYf_-PUzwZx3FXC_G3zSyWU/exec';
-const BOT_BASE = 'https://raw.githubusercontent.com/es1063122-creator/legal-app/main/';
+/* ============================================================
+   ✅ 구글 Apps Script 웹앱 URL
+   ============================================================ */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzZ3jSi8r6vYys-afA7UhsZpTqr2-7dbZK5A52GtPZYKp641PHE90E8NdYaidP10w/exec';
+/* ============================================================ */
 
-const INDUSTRY_CONFIG = {
-  construction: {
-    name: '건설업',
-    emoji: '🏗',
-    tabs: [
-      { label: '산안법', questions: ['안전관리자 선임 기준은?', '위험성평가 의무는?', '추락방지 기준은?'] },
-      { label: '중대재해법', questions: ['경영책임자 의무는?', '중대산업재해 처벌은?', '안전보건관리체계는?'] },
-      { label: '업종별', questions: ['건설현장 안전관리계획서 제출 대상은?', '비계 작업발판 기준은?', '밀폐공간 작업 수칙은?'] }
-    ],
-    quickBtns: ['안전관리자 선임', '추락방지 기준', '비계 설치기준', '밀폐공간 작업'],
-    prompts: ['안전관리자 선임 기준을 알려주세요', '추락 방지 안전조치 기준은?', '비계 작업발판 폭 기준은?', '밀폐공간 작업 시 법적 수칙은?']
-  },
-  manufacturing: {
-    name: '제조업',
-    emoji: '🏭',
-    tabs: [
-      { label: '산안법', questions: ['제조업 안전관리자 기준은?', '기계·설비 방호장치 기준은?', '화학물질 취급 기준은?'] },
-      { label: '중대재해법', questions: ['제조업 중대재해 사례는?', '경영책임자 안전의무는?', '안전보건관리체계 구축은?'] },
-      { label: '업종별', questions: ['프레스 방호장치 기준은?', 'PSM 대상 사업장은?', '위험기계·기구 검사 기준은?'] }
-    ],
-    quickBtns: ['방호장치 기준', '화학물질 관리', 'PSM 대상', '기계검사 기준'],
-    prompts: ['기계·설비 방호장치 설치 기준은?', '화학물질 취급 시 안전기준은?', 'PSM 대상 사업장 기준은?', '위험기계·기구 자율안전 검사 기준은?']
-  },
-  service: {
-    name: '서비스업',
-    emoji: '🏨',
-    tabs: [
-      { label: '산안법', questions: ['서비스업 안전관리자 선임은?', '소규모 사업장 안전기준은?', '고객응대 근로자 보호는?'] },
-      { label: '중대재해법', questions: ['서비스업 중대재해 적용은?', '소규모 사업장 적용 기준은?', '안전보건계획 수립 의무는?'] },
-      { label: '업종별', questions: ['병원 안전관리 기준은?', '호텔 화재안전 기준은?', '마트 적재물 안전기준은?'] }
-    ],
-    quickBtns: ['고객응대 보호', '소규모 안전기준', '화재안전 기준', '미끄럼 방지'],
-    prompts: ['고객응대 근로자 보호 조치 기준은?', '소규모 서비스업 안전관리 기준은?', '병원·호텔 화재안전 기준은?', '마트 적재물 안전관리 기준은?']
-  },
-  logistics: {
-    name: '물류·유통',
-    emoji: '🚛',
-    tabs: [
-      { label: '산안법', questions: ['물류창고 안전관리자 기준은?', '지게차 안전기준은?', '하역작업 안전수칙은?'] },
-      { label: '중대재해법', questions: ['물류업 중대재해 사례는?', '택배기사 안전의무는?', '운송업 안전보건관리는?'] },
-      { label: '업종별', questions: ['컨베이어 안전기준은?', '창고 적재 안전기준은?', '냉동창고 작업 안전기준은?'] }
-    ],
-    quickBtns: ['지게차 안전기준', '하역작업 기준', '창고 적재기준', '운반기계 검사'],
-    prompts: ['지게차 작업 시 안전기준은?', '하역작업 안전수칙은?', '물류창고 적재 안전기준은?', '컨베이어 방호장치 기준은?']
-  },
-  other: {
-    name: '기타',
-    emoji: '🏢',
-    tabs: [
-      { label: '산안법', questions: ['안전관리자 선임 기준은?', '위험성평가 의무는?', '산재 보고 의무는?'] },
-      { label: '중대재해법', questions: ['중대재해처벌법 적용 대상은?', '경영책임자 의무는?', '안전보건관리체계는?'] },
-      { label: '업종별', questions: ['사무직 안전보건 기준은?', '감정노동자 보호기준은?', '화재예방 기준은?'] }
-    ],
-    quickBtns: ['안전관리자 선임', '위험성평가', '중대재해법 적용', '산재 보고'],
-    prompts: ['안전관리자 선임 기준을 알려주세요', '위험성평가 실시 의무는?', '중대재해처벌법 적용 대상은?', '산재 발생 시 사업주 의무는?']
-  }
+/* ✅ 캐릭터 이미지 베이스(4종)
+   dj-ai-default.png / dj-ai-thinking.png / dj-ai-warning.png / dj-ai-error.png */
+const BOT_BASE = "https://raw.githubusercontent.com/es1063122-creator/ai-bot/main/";
+const BOT_FACE = document.getElementById('botFace');
+const STATUS_TXT = document.getElementById('statusText');
+
+let currentEmotion = "default";
+
+/* ── 업종/직책 상태 ── */
+let userIndustry = 'construction';
+let userRole = 'manager';
+let userIndustryName = '건설업';
+let userRoleName = '안전관리자';
+
+const INDUSTRY_NAMES = {
+  construction: '건설업',
+  manufacturing: '제조업',
+  service: '서비스업',
+  logistics: '물류·유통업',
+  other: '기타'
 };
-
-const ROLE_CONFIG = {
-  manager_chief: '안전관리책임자',
+const ROLE_NAMES = {
+  manager_chief: '안전보건관리책임자',
   manager: '안전관리자',
   supervisor: '관리감독자',
   other: '기타'
 };
 
-let userIndustry = 'construction';
-let userRole = 'manager';
-let currentEmotion = 'default';
-let isTyping = false;
-let conversationHistory = [];
-let currentTab = 'all';
-
-const BOT_FACE = document.getElementById('botFace');
-const messages = document.getElementById('chatMessages');
-const input = document.getElementById('chatInput');
-const sendBtn = document.getElementById('sendBtn');
-
+/* ── Flutter에서 호출: 업종/직책 설정 ── */
 function setUserProfile(industry, role) {
   userIndustry = industry || 'construction';
   userRole = role || 'manager';
+  userIndustryName = INDUSTRY_NAMES[userIndustry] || '건설업';
+  userRoleName = ROLE_NAMES[userRole] || '안전관리자';
+  console.log('동진이 프로필 설정:', userIndustryName, userRoleName);
+}
+function setEmotion(type){
+  currentEmotion = type;
+  BOT_FACE.src = BOT_BASE + "dj-ai-" + type + ".png";
 
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const badge = document.getElementById('industryBadge');
-  if (badge) {
-    badge.textContent = cfg.emoji + ' ' + cfg.name;
+  if(type === "thinking") STATUS_TXT.textContent = "법령 검색/분석 중…";
+  else if(type === "warning") STATUS_TXT.textContent = "처벌/과태료 위험 분석";
+  else if(type === "error") STATUS_TXT.textContent = "오류 발생";
+  else STATUS_TXT.textContent = "KDH-safety";
+}
+
+const messages = document.getElementById('chatMessages');
+const input    = document.getElementById('chatInput');
+const sendBtn  = document.getElementById('sendBtn');
+
+let isTyping = false;
+let conversationHistory = [];
+
+// 🔥 Enter = 전송 / Shift+Enter = 줄바꿈
+input.addEventListener("keydown", function (e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
   }
+});
+/* 자동 높이 */
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
 
-  updateTabs();
-  updateQuickBtns();
-  setEmotion('default');
+function sendQuick(text){
+  input.value = text;
+  input.dispatchEvent(new Event('input'));
+  sendMessage();
 }
 
-function updateTabs() {
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const tabsEl = document.getElementById('lawTabs');
-  tabsEl.innerHTML = `
-    <button class="law-tab active" onclick="setTab(this, 'all')">전체</button>
-    ${cfg.tabs.map(function(t) {
-      return '<button class="law-tab" onclick="setTab(this, \'' + t.label + '\')">' + t.label + '</button>';
-    }).join('')}
-    <button class="law-tab" onclick="setTab(this, 'photo')">📷 사진분석</button>
-  `;
-  currentTab = 'all';
+function nowTime(){
+  return new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
 }
 
-function setTab(el, tabId) {
-  document.querySelectorAll('.law-tab').forEach(function(t) {
-    t.classList.remove('active');
-  });
+/* 탭 처리 */
+function setTab(el, quickList){
+  document.querySelectorAll('.law-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  currentTab = tabId;
 
-  const photoBar = document.getElementById('photoBar');
-  if (tabId === 'photo') {
-    photoBar.style.display = 'flex';
-    return;
-  }
-  photoBar.style.display = 'none';
-
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const found = cfg.tabs.find(function(t) { return t.label === tabId; });
   const qb = document.getElementById('quickBtns');
-  if (!qb) return;
+  if(!qb) return;
 
-  if (found) {
-    qb.innerHTML = found.questions.map(function(q) {
-      const shortLabel = q.length > 18 ? q.slice(0, 17) + '…' : q;
-      return '<button class="quick-btn" onclick=\'sendQuick(' + JSON.stringify(q) + ')\'>' + shortLabel + '</button>';
-    }).join('');
+  if(quickList.length > 0){
+    qb.innerHTML = quickList.map(q =>
+      `<button class="quick-btn" onclick="sendQuick(${JSON.stringify(q)})">${q.length > 18 ? q.slice(0,17)+'…' : q}</button>`
+    ).join('');
   } else {
-    updateQuickBtns();
+    qb.innerHTML = `
+      <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
+      <button class="quick-btn" onclick="sendQuick('중대재해처벌법 적용 대상은?')">중대재해 적용</button>
+      <button class="quick-btn" onclick="sendQuick('추락 방지 안전조치 기준은?')">추락방지</button>
+      <button class="quick-btn" onclick="sendQuick('밀폐공간 작업 시 법적 수칙은?')">밀폐공간</button>
+      <button class="quick-btn" onclick="sendQuick('위험성평가 실시 의무가 있나요?')">위험성평가</button>
+      <button class="quick-btn" onclick="sendQuick('산재 발생 시 사업주 의무/보고는?')">산재 보고</button>
+    `;
   }
 }
 
-function updateQuickBtns() {
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const qb = document.getElementById('quickBtns');
-  if (!qb) return;
-
-  qb.innerHTML = cfg.quickBtns.map(function(label, i) {
-    return '<button class="quick-btn" onclick=\'sendQuick(' + JSON.stringify(cfg.prompts[i]) + ')\'>' + label + '</button>';
-  }).join('');
-}
-
-function setEmotion(type) {
-  currentEmotion = type || 'default';
-  BOT_FACE.src = BOT_BASE + 'dj-ai-' + currentEmotion + '.png';
-}
-
-function nowTime() {
-  return new Date().toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
-
-function escapeHtml_(s) {
-  return String(s)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
-}
-
-function appendMessage(role, html, lawCards) {
+/* 메시지 추가 (lawCards 포함) */
+function appendMessage(role, html, lawCards){
   const wrap = document.createElement('div');
-  wrap.className = 'msg ' + role;
+  wrap.className = `msg ${role}`;
 
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const roleName = ROLE_CONFIG[userRole] || '안전관리자';
-
-  const avatarHtml = role === 'bot'
-    ? '<div class="msg-avatar"><img src="' + BOT_BASE + 'dj-ai-' + currentEmotion + '.png" alt="동진이"></div>'
-    : '<div class="msg-avatar">👷</div>';
+  let avatarHtml = '';
+  if(role === 'bot'){
+    avatarHtml = `<div class="msg-avatar"><img src="${BOT_BASE + 'dj-ai-' + currentEmotion + '.png'}" alt="bot"></div>`;
+  } else {
+    avatarHtml = `<div class="msg-avatar">👷</div>`;
+  }
 
   let cardsHtml = '';
-  if (Array.isArray(lawCards) && lawCards.length > 0) {
-    cardsHtml = '<div class="law-cards">' + lawCards.map(function(c) {
-      return `
-        <div class="law-card">
-          <span class="law-card-badge">📋 관련법령</span>
-          <div class="law-card-title">${escapeHtml_(c.name || '')}</div>
-          ${c.desc ? `<div class="law-card-desc">${escapeHtml_(c.desc)}</div>` : ''}
-          ${c.url ? `<a class="law-card-link" href="${c.url}" target="_blank" rel="noopener">🔗 법령 전문 보기 →</a>` : ''}
-        </div>
-      `;
-    }).join('') + '</div>';
+  if(Array.isArray(lawCards) && lawCards.length > 0){
+    cardsHtml = `<div class="law-cards">` + lawCards.map(c => `
+      <div class="law-card">
+        <span class="law-card-badge">📋 관련법령</span>
+        <div class="law-card-title">${escapeHtml_(c.name || '')}</div>
+        ${c.desc ? `<div class="law-card-desc">${escapeHtml_(c.desc)}</div>` : ''}
+        ${c.url ? `<a class="law-card-link" href="${c.url}" target="_blank" rel="noopener">🔗 법령 전문 보기 →</a>` : ''}
+      </div>
+    `).join('') + `</div>`;
   }
-
-  const name = role === 'bot'
-    ? '동진이 <span class="industry-badge">' + cfg.emoji + ' ' + cfg.name + '</span>'
-    : roleName;
 
   wrap.innerHTML = `
     ${avatarHtml}
     <div class="msg-content">
-      <span class="msg-name">${name}</span>
+      <span class="msg-name">${role === 'bot' ? '도우미' : '나'}</span>
       <div class="msg-bubble">${html}</div>
       ${cardsHtml}
       <div class="msg-time">${nowTime()}</div>
@@ -600,14 +648,14 @@ function appendMessage(role, html, lawCards) {
   messages.scrollTop = messages.scrollHeight;
 }
 
-function showTyping() {
+function showTyping(){
   const d = document.createElement('div');
   d.className = 'msg bot';
   d.id = 'typingMsg';
   d.innerHTML = `
-    <div class="msg-avatar"><img src="${BOT_BASE}dj-ai-thinking.png" alt="동진이"></div>
+    <div class="msg-avatar"><img src="${BOT_BASE + 'dj-ai-thinking.png'}" alt="bot"></div>
     <div class="msg-content">
-      <span class="msg-name">동진이</span>
+      <span class="msg-name">KDH</span>
       <div class="typing-indicator">
         <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
       </div>
@@ -617,193 +665,128 @@ function showTyping() {
   messages.scrollTop = messages.scrollHeight;
 }
 
-function hideTyping() {
+function hideTyping(){
   const t = document.getElementById('typingMsg');
-  if (t) t.remove();
+  if(t) t.remove();
 }
 
-function applyEmotionByText(reply) {
-  const danger = ['징역', '벌금', '처벌', '과태료', '위반', '형사', '벌칙', '행정처분', '영업정지', '송치', '기소'];
-  const isWarning = danger.some(function(w) { return String(reply).includes(w); });
-  setEmotion(isWarning ? 'warning' : 'default');
+/* ✅ 답변 내용에 따라 표정 전환 */
+function applyEmotionByText(reply){
+  const danger = ["징역","벌금","처벌","과태료","위반","형사","벌칙","행정처분","영업정지","송치","기소"];
+  const isWarning = danger.some(w => reply.includes(w));
+  setEmotion(isWarning ? "warning" : "default");
 }
 
-function toReportStyleHtml_(rawText) {
-  const looksHtml = /<\/?(div|br|strong|span|a|ul|li|p|em|code)\b/i.test(rawText);
-  if (looksHtml) return rawText;
+/* ✅ 서버가 주는 답변을 실무보고형으로 정리(가능하면) */
+function toReportStyleHtml_(rawText){
+  // 서버가 이미 HTML을 주는 경우 그대로 사용 (단순히 판단)
+  const looksHtml = /<\/?(div|br|strong|span|a|ul|li|p)\b/i.test(rawText);
+  if(looksHtml) return rawText;
 
-  const safe = escapeHtml_(rawText).replace(/\n/g, '<br>');
-  return '<div class="ai-section"><div class="ai-title">🧾 답변</div><div class="hint">' + safe + '</div></div>';
+  // 기본은 텍스트를 보고서형 섹션으로 감싸기(간단)
+  const safe = escapeHtml_(rawText).replace(/\n/g,'<br>');
+
+  return `
+    <div class="ai-section">
+      <div class="ai-title">🧾 답변</div>
+      <div class="hint">${safe}</div>
+    </div>
+  `;
 }
 
-function sendQuick(text) {
-  input.value = text;
-  input.dispatchEvent(new Event('input'));
-  sendMessage();
-}
-
-input.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-
-input.addEventListener('input', function() {
-  input.style.height = 'auto';
-  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-});
-
-async function analyzePhoto(inputEl) {
-  const file = inputEl.files[0];
-  if (!file || isTyping) return;
-
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    const base64Url = e.target.result;
-    const pureBase64 = String(base64Url).split(',')[1] || '';
-
-    appendMessage('user', '<img src="' + base64Url + '" class="photo-preview"><br>📷 현장 사진을 분석해 주세요.');
-
-    sendBtn.disabled = true;
-    isTyping = true;
-    setEmotion('thinking');
-    showTyping();
-
-    const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-    const roleName = ROLE_CONFIG[userRole] || '안전관리자';
-
-    try {
-      const payload = {
-        question: '[사진 위험성 분석 요청] 업종: ' + cfg.name + ', 직책: ' + roleName + '. 첨부된 현장 사진을 분석하여 위험 요소, 법적 위반 사항, 개선 조치를 안전 법령 기준으로 설명해주세요.',
-        history: conversationHistory,
-        imageBase64: pureBase64,
-        imageMimeType: file.type || 'image/jpeg',
-        industry: userIndustry,
-        industryName: cfg.name,
-        role: userRole,
-        roleName: roleName
-      };
-
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-
-      const textBody = await res.text();
-      let data = null;
-      try {
-        data = JSON.parse(textBody);
-      } catch (_err) {
-        data = { reply: textBody, laws: [] };
-      }
-
-      hideTyping();
-
-      const reply = data.reply || data.answer || '분석 결과를 받아오지 못했습니다.';
-      const laws = Array.isArray(data.laws) ? data.laws : [];
-
-      applyEmotionByText(reply);
-      appendMessage('bot', toReportStyleHtml_(reply), laws);
-
-      conversationHistory.push({
-        role: 'assistant',
-        content: reply
-      });
-
-    } catch (err) {
-      hideTyping();
-      setEmotion('error');
-      appendMessage('bot', '❌ 사진 분석 중 오류가 발생했습니다.<br>Apps Script 배포 상태와 URL을 확인해 주세요.');
-    }
-
-    sendBtn.disabled = false;
-    isTyping = false;
-    inputEl.value = '';
-  };
-
-  reader.readAsDataURL(file);
-}
-
-async function sendMessage() {
+/* ✅ Apps Script 호출 */
+async function sendMessage(){
   const text = input.value.trim();
-  if (!text || isTyping) return;
+  if(!text || isTyping) return;
 
-  appendMessage('user', escapeHtml_(text).replace(/\n/g, '<br>'));
+  appendMessage('user', escapeHtml_(text).replace(/\n/g,'<br>'));
   conversationHistory.push({ role: 'user', content: text });
 
   input.value = '';
   input.style.height = 'auto';
+
   sendBtn.disabled = true;
   isTyping = true;
-  setEmotion('thinking');
+
+  setEmotion("thinking");
   showTyping();
 
-  const cfg = INDUSTRY_CONFIG[userIndustry] || INDUSTRY_CONFIG.other;
-  const roleName = ROLE_CONFIG[userRole] || '안전관리자';
-
-  try {
+  try{
+    // ✅ 서버가 question/history 둘 다 받는 형태 대응
     const payload = {
       question: text,
       history: conversationHistory,
       industry: userIndustry,
-      industryName: cfg.name,
+      industryName: userIndustryName,
       role: userRole,
-      roleName: roleName
+      roleName: userRoleName
     };
 
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
+    // 응답이 JSON이 아닐 수도 있어 방어
     const textBody = await res.text();
     let data = null;
-    try {
-      data = JSON.parse(textBody);
-    } catch (_err) {
-      data = { reply: textBody, laws: [] };
-    }
+    try { data = JSON.parse(textBody); }
+    catch(_e){ data = { success:false, error:'JSON 파싱 실패', raw:textBody }; }
 
     hideTyping();
 
-    const ok = data && (data.reply || data.answer);
-    if (!ok) {
-      setEmotion('error');
-      appendMessage('bot', '❌ 서버 오류: ' + escapeHtml_(data && data.error ? data.error : '응답 형식 오류'));
+    // ✅ 다양한 응답 키 지원
+    // - {reply, laws}
+    // - {answer, laws}
+    // - {success:true, answer}
+    // - {success:true, reply}
+    // - {success:false, error}
+    const ok = (data && (data.success === true || data.reply || data.answer));
+    if(!ok){
+      setEmotion("error");
+      const errMsg = data?.error ? String(data.error) : '서버 응답 형식 오류';
+      appendMessage('bot', `❌ 서버 오류: ${escapeHtml_(errMsg)}<br><br><span class="hint">Apps Script 배포/권한/URL을 확인하세요.</span>`);
       sendBtn.disabled = false;
       isTyping = false;
       return;
     }
 
-    const reply = data.reply || data.answer;
-    const laws = Array.isArray(data.laws) ? data.laws : [];
+    let reply = data.reply || data.answer || '(빈 응답)';
+    let laws  = Array.isArray(data.laws) ? data.laws : [];
 
+    // 표정 전환
     applyEmotionByText(reply);
-    conversationHistory.push({ role: 'assistant', content: reply });
-    appendMessage('bot', toReportStyleHtml_(reply), laws);
 
-  } catch (err) {
+    // 실무보고형 래핑
+    const replyHtml = toReportStyleHtml_(reply);
+
+    conversationHistory.push({ role: 'assistant', content: reply });
+    appendMessage('bot', replyHtml, laws);
+
+  } catch(err){
     hideTyping();
-    setEmotion('error');
-    appendMessage('bot', '❌ 서버 연결 오류가 발생했습니다.<br>Apps Script URL/배포 설정을 확인해 주세요.');
+    setEmotion("error");
+    appendMessage('bot', '❌ 서버 연결 오류가 발생했습니다.<br>Apps Script URL/배포(웹앱) 설정을 확인해 주세요.');
   }
 
   sendBtn.disabled = false;
   isTyping = false;
 }
 
-function notifyMessageSent() {
-  if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
-    window.FlutterBridge.postMessage('message_sent');
-  }
+/* HTML escape */
+function escapeHtml_(s){
+  return String(s)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
 }
 
-setEmotion('default');
-updateTabs();
-updateQuickBtns();
+/* 시작 상태 */
+setEmotion("default");
 </script>
+
 </body>
 </html>
