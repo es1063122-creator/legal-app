@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>동진이 - 안전관리 AI 어시스턴트</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet" />
   <style>
@@ -21,6 +21,10 @@
       color: var(--text);
       height: 100vh;
       overflow: hidden;
+    }
+    /* iOS/Android 홈버튼 영역 확보 */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      .disclaimer { padding-bottom: calc(4px + env(safe-area-inset-bottom)); }
     }
 
     .chat-panel {
@@ -352,7 +356,7 @@
     .disclaimer {
       background: #fff7ed;
       border-top: 1px solid #fed7aa;
-      padding: 4px 10px;
+      padding: 4px 10px env(safe-area-inset-bottom, 16px);
       font-size: 0.60rem;
       color: #92400e;
       text-align: center;
@@ -440,7 +444,7 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWbYAmFw_s7vNKbwr1eSludmgwc1A5DandFS3_bqT1H7N7vmqnYcAvT_mgoE-WDU0h/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNmCoAtxJCXcuJlwKmeZfx42h1Yikgw-9YckzRyE5xUbYf_-PUzwZx3FXC_G3zSyWU/exec';
 const BOT_BASE = 'https://raw.githubusercontent.com/es1063122-creator/legal-app/main/';
 
 const INDUSTRY_CONFIG = {
