@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   fetch-laws:
     runs-on: ubuntu-latest
@@ -22,12 +25,17 @@ jobs:
           python-version: '3.11'
 
       - name: 패키지 설치
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: 파일 확인
         run: |
           echo "=== fetch_laws.py 내용 확인 ==="
           head -50 fetch_laws.py
+          echo "=== fetch_moel_notices.py 존재 확인 ==="
+          ls -al
+          test -f fetch_moel_notices.py && echo "fetch_moel_notices.py 확인 완료"
 
       - name: 고시·예규·훈령 자동 수집
         env:
@@ -40,3 +48,23 @@ jobs:
           FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
           LAW_OC: ${{ secrets.LAW_OC }}
         run: python fetch_byeolpyo.py
+
+      - name: 고용노동부 최근 고시 직접 수집
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+          MOEL_MAX_PAGES: '5'
+        run: python fetch_moel_notices.py
+
+      - name: 변경된 JSON 커밋 및 푸시
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/moel_recent_notices.json
+
+          if git diff --cached --quiet; then
+            echo "커밋할 변경사항 없음"
+          else
+            git commit -m "chore: update MOEL recent notices snapshot"
+            git push origin main
+          fi
