@@ -1,0 +1,49 @@
+name: Daily MOEL Notices Sync
+
+on:
+  schedule:
+    # 한국시간 기준 오전 9시쯤 돌리고 싶으면 UTC 00시 근처로 맞추면 됨
+    - cron: "10 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-moel-notices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run MOEL notice sync
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+          MOEL_MAX_PAGES: "5"
+        run: |
+          python fetch_moel_notices.py
+
+      - name: Commit updated JSON snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/moel_recent_notices.json
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update MOEL recent notices snapshot"
+            git push
+          fi
