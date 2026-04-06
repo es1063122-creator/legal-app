@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "=== fetch_laws.py 내용 확인 ==="
           head -50 fetch_laws.py
-          echo "=== fetch_moel_notices.py 존재 확인 ==="
+          echo "=== 파일 목록 확인 ==="
           ls -al
           test -f fetch_moel_notices.py && echo "fetch_moel_notices.py 확인 완료"
 
@@ -60,6 +60,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          mkdir -p data
           git add data/moel_recent_notices.json
 
           if git diff --cached --quiet; then
