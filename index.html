@@ -526,6 +526,15 @@ const messages = document.getElementById('chatMessages');
 const input = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
 
+function requestPhotoFromFlutter() {
+  if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
+    window.FlutterBridge.postMessage('PICK_PHOTO');
+  } else {
+    // 앱 밖 브라우저에서 테스트할 때 fallback
+    alert('이 기능은 앱에서만 사용 가능합니다.');
+  }
+}
+
 function searchInApp(lawName) {
   try {
     if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
