@@ -420,17 +420,15 @@
 
   <div class="photo-bar" id="photoBar" style="display:none;">
     <span class="photo-label">📷 현장 사진으로 위험성 분석</span>
-    <button class="photo-btn" type="button" onclick="document.getElementById('photoFileInput').click()">
+    <button class="photo-btn" type="button" onclick="requestPhotoFromFlutter()">
       📸 사진 선택
     </button>
-    <input type="file" id="photoFileInput" accept="image/*" onchange="analyzePhoto(this)">
   </div>
 
   <div class="chat-input-area">
-    <button class="photo-attach-btn" type="button" onclick="document.getElementById('inlinePhotoInput').click()" title="사진 첨부">
+    <button class="photo-attach-btn" type="button" onclick="requestPhotoFromFlutter()" title="사진 첨부">
       📷
     </button>
-    <input type="file" id="inlinePhotoInput" accept="image/*" style="display:none" onchange="analyzePhoto(this)">
     <textarea class="chat-input" id="chatInput"
       placeholder="질문하거나 현장 사진을 첨부해보세요!" rows="1"></textarea>
     <button class="send-btn" id="sendBtn" type="button" onclick="sendMessage()">
@@ -527,6 +525,18 @@ const BOT_FACE = document.getElementById('botFace');
 const messages = document.getElementById('chatMessages');
 const input = document.getElementById('chatInput');
 const sendBtn = document.getElementById('sendBtn');
+
+function searchInApp(lawName) {
+  try {
+    if (window.FlutterBridge && typeof window.FlutterBridge.postMessage === 'function') {
+      window.FlutterBridge.postMessage('search:' + lawName);
+    } else if (window.flutter_inappwebview) {
+      window.flutter_inappwebview.callHandler('search', lawName);
+    }
+  } catch(e) {
+    console.error('searchInApp 오류:', e);
+  }
+}  
 
 function setUserProfile(industry, role) {
   userIndustry = industry || 'construction';
