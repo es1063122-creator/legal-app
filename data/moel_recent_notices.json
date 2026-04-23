@@ -1,7 +1,16 @@
 {
-  "generatedAt": "2026-04-22T03:38:39.181076+00:00",
-  "count": 14,
+  "generatedAt": "2026-04-23T02:41:49.229432+00:00",
+  "count": 13,
   "items": [
+    {
+      "title": "[예규] 산업안전지도사 및 산업보건지도사 시험위원회 구성·운영 등에 관한 규정 개정",
+      "department": "산업안전정책과",
+      "lawType": "예규",
+      "postedDate": "2026-03-12",
+      "detailUrl": "https://www.moel.go.kr/view.do?bbs_seq=20260300650",
+      "matchedBy": "title",
+      "summary": "[예규] [예규] 산업안전지도사 및 산업보건지도사 시험위원회 구성·운영 등에 관한 규정 개정 | 담당부서: 산업안전정책과"
+    },
     {
       "title": "[고시] 공공기관의 안전활동 수준평가에 관한 고시 개정",
       "department": "산업안전정책과",
@@ -57,15 +66,6 @@
       "summary": "[고시] [고시] 산업재해예방시설자금 융자금 지원사업 및 클린사업장 조성지원사업 운영규정 일부 개정 | 담당부서: 산업안전기준과"
     },
     {
-      "title": "[고시] 고용·산재보험료 완납증명 제외 대상 및 완납증명 방법에 관한 기준",
-      "department": "고용보험기획과",
-      "lawType": "고시",
-      "postedDate": "2026-01-02",
-      "detailUrl": "https://www.moel.go.kr/view.do?bbs_seq=20260100007",
-      "matchedBy": "title",
-      "summary": "[고시] [고시] 고용·산재보험료 완납증명 제외 대상 및 완납증명 방법에 관한 기준 | 담당부서: 고용보험기획과"
-    },
-    {
       "title": "[고시] 산업재해보상보험 요양급여 산정기준",
       "department": "산재보상정책과",
       "lawType": "고시",
@@ -118,15 +118,6 @@
       "detailUrl": "https://www.moel.go.kr/view.do?bbs_seq=20251201804",
       "matchedBy": "department",
       "summary": "[고시] [고시] 전체 근로자의 임금 평균액의 증감률 및 소비자물가변동률 | 담당부서: 산재보상정책과"
-    },
-    {
-      "title": "[고시] 직업재활급여 상한금액",
-      "department": "산재보상정책과",
-      "lawType": "고시",
-      "postedDate": "2025-12-31",
-      "detailUrl": "https://www.moel.go.kr/view.do?bbs_seq=20251201803",
-      "matchedBy": "department",
-      "summary": "[고시] [고시] 직업재활급여 상한금액 | 담당부서: 산재보상정책과"
     }
   ]
 }
