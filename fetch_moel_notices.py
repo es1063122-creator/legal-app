@@ -45,7 +45,16 @@ BODY_KEYWORDS = [
     "산업안전", "안전보건", "산업재해", "재해예방", "보호구",
     "위험성평가", "유해위험", "안전기준", "안전조치", "중대재해",
     "밀폐공간", "근로자 건강", "작업환경", "산업안전보건",
-    "보건지도사", "안전지도사",
+    "보건지도사", "안전지도사", "안전관리", "산재예방",
+    "위험물", "유해물질", "화학물질", "보건관리",
+]
+
+# 본문 매칭 시 제외할 키워드 (안전 무관 항목 필터)
+BODY_EXCLUDE_KEYWORDS = [
+    "월평균보수", "노무비율", "보수고시", "기준보수",
+    "보험료", "고용보험", "임금채권", "상한액",
+    "취업지원", "직업능력", "고용위기", "고용평등",
+    "국고보조", "보조사업", "훈련지원",
 ]
 
 OUTPUT_JSON_PATH = "data/moel_recent_notices.json"
@@ -118,18 +127,31 @@ def is_safety_related(title: str, department: str, body: str = "") -> tuple[bool
     if contains_any(title, TITLE_KEYWORDS):
         return True, "title"
     if contains_any(department, DEPT_KEYWORDS):
-        return True, "department"
+        # 담당부서 매칭이어도 제목에 명백히 무관하면 제외
+        if not contains_any(title, BODY_EXCLUDE_KEYWORDS):
+            return True, "department"
     if contains_any(body, BODY_KEYWORDS):
+        # 제목/본문에 제외 키워드 있으면 안전 무관으로 판단
+        if contains_any(title, BODY_EXCLUDE_KEYWORDS):
+            return False, ""
         return True, "body"
     return False, ""
 
 
 def fetch_list_page(page: int) -> str:
     params = {"pageIndex": page}
-    response = SESSION.get(BASE_LIST_URL, params=params, timeout=20)
-    response.raise_for_status()
-    response.encoding = response.apparent_encoding or "utf-8"
-    return response.text
+    for attempt in range(3):  # 최대 3번 재시도
+        try:
+            response = SESSION.get(BASE_LIST_URL, params=params, timeout=30)
+            response.raise_for_status()
+            response.encoding = response.apparent_encoding or "utf-8"
+            return response.text
+        except Exception as e:
+            if attempt < 2:
+                print(f"  ⚠ 재시도 {attempt+1}/3: {e}")
+                time.sleep(3 * (attempt + 1))
+            else:
+                raise
 
 
 def build_detail_url(href: str) -> str:
