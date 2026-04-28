@@ -37,6 +37,8 @@ DEPT_KEYWORDS = [
     "직업건강증진팀",
     "산재보상정책과",
     "안전보건감독기획과",
+    "화학사고예방조사과",   # 화학물질 안전
+    "근로감독기획과",       # 근로자 안전 감독
 ]
 
 BODY_KEYWORDS = [
@@ -130,6 +132,26 @@ def fetch_list_page(page: int) -> str:
     return response.text
 
 
+def build_detail_url(href: str) -> str:
+    """고용노동부 상세페이지 URL 생성"""
+    if not href:
+        return ""
+    href = href.strip()
+    # 이미 절대 URL이면 그대로
+    if href.startswith("http"):
+        return href
+    # bbs_seq 파라미터 추출
+    import re
+    m = re.search(r'bbs_seq=([0-9]+)', href)
+    if m:
+        bbs_seq = m.group(1)
+        return f"{BASE_DOMAIN}/info/lawinfo/instruction/view.do?bbs_seq={bbs_seq}"
+    # 상대경로면 BASE_DOMAIN에 붙임
+    if href.startswith("/"):
+        return f"{BASE_DOMAIN}{href}"
+    return f"{BASE_DOMAIN}/{href}"
+
+
 def parse_list_page(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "lxml")
     rows = []
@@ -161,7 +183,7 @@ def parse_list_page(html: str) -> list[dict]:
                 title = clean_text(link.get_text(" ", strip=True))
                 href = (link.get("href") or "").strip()
                 if href:
-                    detail_url = urljoin(BASE_DOMAIN, href)
+                    detail_url = build_detail_url(href)
             else:
                 title = clean_text(title_col.get_text(" ", strip=True))
 
