@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>동진이 - 안전관리 AI 어시스턴트</title>
+  <title>렉스 - 안전관리 AI 어시스턴트</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -218,13 +218,13 @@
       <div class="msg-avatar">
         <img class="bot-img" id="botFace"
              src="https://raw.githubusercontent.com/es1063122-creator/legal-app/main/dj-ai-default.png"
-             alt="동진이">
+             alt="렉스">
       </div>
       <div class="msg-content">
-        <span class="msg-name" id="greetingName">동진이 <span class="industry-badge" id="industryBadge">🏗 건설업</span></span>
+        <span class="msg-name" id="greetingName">렉스 <span class="industry-badge" id="industryBadge">🏗 건설업</span></span>
         <div class="msg-bubble" id="greetingBubble">
           안녕하세요! 👋<br>
-          저는 <strong>안전관리 AI 어시스턴트 동진이</strong>예요.<br>
+          저는 <strong>안전관리 AI 어시스턴트 렉스</strong>예요.<br>
           업종과 직책에 맞게 안전 법령을 안내해드릴게요!
           <div class="quick-btns" id="quickBtns">
             <button class="quick-btn" onclick="sendQuick('안전관리자 선임 기준을 알려주세요')">안전관리자 선임</button>
@@ -272,11 +272,11 @@ const BOT_BASE = 'https://raw.githubusercontent.com/es1063122-creator/legal-app/
 // ── 다국어 UI 텍스트 ─────────────────────────────────────────
 const UI_TEXTS = {
   ko: {
-    name:'Korean', greeting:'안녕하세요! 👋<br>저는 <strong>안전관리 AI 어시스턴트 동진이</strong>예요.<br>업종과 직책에 맞게 안전 법령을 안내해드릴게요!',
+    name:'Korean', greeting:'안녕하세요! 👋<br>저는 <strong>안전관리 AI 어시스턴트 렉스</strong>예요.<br>업종과 직책에 맞게 안전 법령을 안내해드릴게요!',
     placeholder:'질문하거나 현장 사진을 첨부해보세요!', now:'지금',
     photoBarLabel:'📷 현장 사진으로 위험성 분석', photoBarBtn:'사진 선택',
     disclaimer:'⚠️ 법적 효력이 있는 전문 법률 조언이 아닙니다. 중요 사안은 전문가(노무사/변호사/공단)와 확인하세요.',
-    botName:'동진이', typingName:'동진이',
+    botName:'렉스', typingName:'렉스',
     analysisTitle:'📷 분석 방식 선택', analysisSubtitle:'현장 사진을 어떻게 분석할까요?',
     safetyBtn:'🔍 안전점검', safetyDesc:'위험요소·법령위반·즉시조치 분석',
     riskBtn:'⚠️ 위험성평가', riskDesc:'빈도×강도 기반 위험성 산정·감소대책',
@@ -290,11 +290,11 @@ const UI_TEXTS = {
     riskPrompt:'[위험성평가 요청] 업종: {industry}, 직책: {role}. 이 사진에 대해 산업안전보건법 위험성평가 기준으로 ①위험요인 파악 ②위험성 추정(빈도×강도) ③위험성 결정 ④감소대책 순서로 작성해주세요.',
   },
   en: {
-    name:'English', greeting:'Hello! 👋<br>I am <strong>Dongjin, your AI Safety Assistant</strong>.<br>I will guide you on safety regulations by industry and role!',
+    name:'English', greeting:'Hello! 👋<br>I am <strong>Rex, your AI Safety Assistant</strong>.<br>I will guide you on safety regulations by industry and role!',
     placeholder:'Ask a question or attach a site photo!', now:'Now',
     photoBarLabel:'📷 Risk analysis with site photos', photoBarBtn:'Select Photo',
     disclaimer:'⚠️ This is not professional legal advice. Please consult experts (attorney/lawyer/KOSHA) for important matters.',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Select Analysis Type', analysisSubtitle:'How would you like to analyze the site photo?',
     safetyBtn:'🔍 Safety Inspection', safetyDesc:'Hazard identification, legal violations, immediate actions',
     riskBtn:'⚠️ Risk Assessment', riskDesc:'Frequency × Severity based risk evaluation',
@@ -308,11 +308,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment Request] Industry: {industry}, Role: {role}. Assess risks in this photo: ①Hazard identification ②Risk estimation (frequency×severity) ③Risk decision ④Reduction measures.',
   },
   'zh-CN': {
-    name:'Chinese (Simplified)', greeting:'您好！👋<br>我是<strong>东进，您的AI安全助手</strong>。<br>我将根据您的行业和职位为您提供安全法规指导！',
+    name:'Chinese (Simplified)', greeting:'您好！👋<br>我是<strong>雷克斯，您的AI安全助手</strong>。<br>我将根据您的行业和职位为您提供安全法规指导！',
     placeholder:'请提问或附上现场照片！', now:'现在',
     photoBarLabel:'📷 用现场照片进行风险分析', photoBarBtn:'选择照片',
     disclaimer:'⚠️ 这不是具有法律效力的专业法律建议。重要事项请咨询专业人士。',
-    botName:'东进', typingName:'东进',
+    botName:'雷克斯', typingName:'雷克斯',
     analysisTitle:'📷 选择分析方式', analysisSubtitle:'您希望如何分析现场照片？',
     safetyBtn:'🔍 安全检查', safetyDesc:'危险因素·法规违规·即时措施分析',
     riskBtn:'⚠️ 风险评估', riskDesc:'基于频率×强度的风险评定',
@@ -326,11 +326,11 @@ const UI_TEXTS = {
     riskPrompt:'[风险评估请求] 行业: {industry}, 职位: {role}. 请评估此照片的风险：①危险识别 ②风险估计(频率×强度) ③风险决定 ④减少措施。',
   },
   ja: {
-    name:'Japanese', greeting:'こんにちは！👋<br>私は<strong>AI安全アシスタントのドンジン</strong>です。<br>業種と職責に合わせて安全法令をご案内します！',
+    name:'Japanese', greeting:'こんにちは！👋<br>私は<strong>AI安全アシスタントのレックス</strong>です。<br>業種と職責に合わせて安全法令をご案内します！',
     placeholder:'質問するか現場写真を添付してください！', now:'今',
     photoBarLabel:'📷 現場写真でリスク分析', photoBarBtn:'写真を選択',
     disclaimer:'⚠️ 法的効力のある専門的な法律アドバイスではありません。重要事項は専門家にご確認ください。',
-    botName:'ドンジン', typingName:'ドンジン',
+    botName:'レックス', typingName:'レックス',
     analysisTitle:'📷 分析方式の選択', analysisSubtitle:'現場写真をどのように分析しますか？',
     safetyBtn:'🔍 安全点検', safetyDesc:'危険要素・法令違反・即時措置の分析',
     riskBtn:'⚠️ リスクアセスメント', riskDesc:'頻度×強度に基づくリスク評定',
@@ -344,11 +344,11 @@ const UI_TEXTS = {
     riskPrompt:'[リスクアセスメントリクエスト] 業種: {industry}, 職責: {role}. この写真のリスクを評価：①危険要因の把握 ②リスク推定(頻度×強度) ③リスク決定 ④低減措置。',
   },
   vi: {
-    name:'Vietnamese', greeting:'Xin chào! 👋<br>Tôi là <strong>Dongjin, trợ lý AI an toàn</strong> của bạn.<br>Tôi sẽ hướng dẫn bạn về quy định an toàn theo ngành và vai trò!',
+    name:'Vietnamese', greeting:'Xin chào! 👋<br>Tôi là <strong>Rex, trợ lý AI an toàn</strong> của bạn.<br>Tôi sẽ hướng dẫn bạn về quy định an toàn theo ngành và vai trò!',
     placeholder:'Đặt câu hỏi hoặc đính kèm ảnh công trường!', now:'Bây giờ',
     photoBarLabel:'📷 Phân tích rủi ro bằng ảnh công trường', photoBarBtn:'Chọn ảnh',
     disclaimer:'⚠️ Đây không phải là tư vấn pháp lý chuyên nghiệp.',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Chọn loại phân tích', analysisSubtitle:'Bạn muốn phân tích ảnh như thế nào?',
     safetyBtn:'🔍 Kiểm tra an toàn', safetyDesc:'Nhận diện mối nguy, vi phạm pháp luật, hành động khẩn cấp',
     riskBtn:'⚠️ Đánh giá rủi ro', riskDesc:'Đánh giá rủi ro theo tần suất × mức độ',
@@ -362,11 +362,11 @@ const UI_TEXTS = {
     riskPrompt:'[Yêu cầu đánh giá rủi ro] Ngành: {industry}, Vai trò: {role}. Đánh giá rủi ro: ①Nhận diện nguy hiểm ②Ước tính rủi ro ③Quyết định rủi ro ④Biện pháp giảm thiểu.',
   },
   id: {
-    name:'Indonesian', greeting:'Halo! 👋<br>Saya <strong>Dongjin, Asisten Keselamatan AI</strong> Anda.<br>Saya akan memandu Anda tentang peraturan keselamatan!',
+    name:'Indonesian', greeting:'Halo! 👋<br>Saya <strong>Rex, Asisten Keselamatan AI</strong> Anda.<br>Saya akan memandu Anda tentang peraturan keselamatan!',
     placeholder:'Ajukan pertanyaan atau lampirkan foto lokasi!', now:'Sekarang',
     photoBarLabel:'📷 Analisis risiko dengan foto lokasi', photoBarBtn:'Pilih Foto',
     disclaimer:'⚠️ Ini bukan nasihat hukum profesional.',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Pilih Jenis Analisis', analysisSubtitle:'Bagaimana Anda ingin menganalisis foto?',
     safetyBtn:'🔍 Inspeksi Keselamatan', safetyDesc:'Identifikasi bahaya, pelanggaran hukum',
     riskBtn:'⚠️ Penilaian Risiko', riskDesc:'Penilaian risiko berdasarkan frekuensi × keparahan',
@@ -380,11 +380,11 @@ const UI_TEXTS = {
     riskPrompt:'[Permintaan penilaian risiko] Industri: {industry}, Peran: {role}. Nilai risiko: ①Identifikasi bahaya ②Estimasi risiko ③Keputusan risiko ④Tindakan pengurangan.',
   },
   th: {
-    name:'Thai', greeting:'สวัสดี! 👋<br>ฉันคือ<strong>ดงจิน ผู้ช่วย AI ด้านความปลอดภัย</strong>ของคุณ<br>ฉันจะแนะนำกฎระเบียบความปลอดภัยตามอุตสาหกรรม!',
+    name:'Thai', greeting:'สวัสดี! 👋<br>ฉันคือ<strong>เร็กซ์ ผู้ช่วย AI ด้านความปลอดภัย</strong>ของคุณ<br>ฉันจะแนะนำกฎระเบียบความปลอดภัยตามอุตสาหกรรม!',
     placeholder:'ถามคำถามหรือแนบรูปภาพสถานที่!', now:'ตอนนี้',
     photoBarLabel:'📷 วิเคราะห์ความเสี่ยงด้วยรูปภาพ', photoBarBtn:'เลือกรูปภาพ',
     disclaimer:'⚠️ นี่ไม่ใช่คำแนะนำทางกฎหมายที่เป็นทางการ',
-    botName:'ดงจิน', typingName:'ดงจิน',
+    botName:'เร็กซ์', typingName:'เร็กซ์',
     analysisTitle:'📷 เลือกประเภทการวิเคราะห์', analysisSubtitle:'คุณต้องการวิเคราะห์รูปภาพอย่างไร?',
     safetyBtn:'🔍 ตรวจสอบความปลอดภัย', safetyDesc:'ระบุอันตราย การละเมิดกฎหมาย',
     riskBtn:'⚠️ ประเมินความเสี่ยง', riskDesc:'ประเมินตามความถี่ × ความรุนแรง',
@@ -398,11 +398,11 @@ const UI_TEXTS = {
     riskPrompt:'[คำขอประเมินความเสี่ยง] อุตสาหกรรม: {industry}, บทบาท: {role}. ประเมินความเสี่ยง: ①การระบุอันตราย ②การประมาณความเสี่ยง ③การตัดสินใจ ④มาตรการลดความเสี่ยง',
   },
   mn: {
-    name:'Mongolian', greeting:'Сайн байна уу! 👋<br>Би <strong>Донжин, таны AI аюулгүй байдлын туслах</strong>.<br>Аюулгүй байдлын дүрмийг таньд тайлбарлана!',
+    name:'Mongolian', greeting:'Сайн байна уу! 👋<br>Би <strong>Рекс, таны AI аюулгүй байдлын туслах</strong>.<br>Аюулгүй байдлын дүрмийг таньд тайлбарлана!',
     placeholder:'Асуулт асуу эсвэл зураг хавсаргана уу!', now:'Одоо',
     photoBarLabel:'📷 Зургаар эрсдэл шинжлэх', photoBarBtn:'Зураг сонгох',
     disclaimer:'⚠️ Энэ нь мэргэжлийн хуулийн зөвлөгөө биш.',
-    botName:'Донжин', typingName:'Донжин',
+    botName:'Рекс', typingName:'Рекс',
     analysisTitle:'📷 Шинжилгээний төрөл сонгох', analysisSubtitle:'Зургийг хэрхэн шинжлэх вэ?',
     safetyBtn:'🔍 Аюулгүй байдлын үзлэг', safetyDesc:'Аюул илрүүлэх, хууль зөрчлийг шинжлэх',
     riskBtn:'⚠️ Эрсдэлийн үнэлгээ', riskDesc:'Давтамж × Хүч чадал дээр суурилсан',
@@ -416,11 +416,11 @@ const UI_TEXTS = {
     riskPrompt:'[Эрсдэлийн үнэлгээний хүсэлт] Салбар: {industry}, Үүрэг: {role}. Эрсдэлийг үнэл: ①Аюул илрүүлэх ②Эрсдэл тооцоолох ③Эрсдэлийн шийдвэр ④Бууруулах арга хэмжээ.',
   },
   km: {
-    name:'Khmer', greeting:'សួស្តី! 👋<br>ខ្ញុំជា <strong>Dongjin, ជំនួយការ AI សុវត្ថិភាព</strong>របស់អ្នក<br>ខ្ញុំនឹងណែនាំអ្នកអំពីបទប្បញ្ញត្តិសុវត្ថិភាព!',
+    name:'Khmer', greeting:'សួស្តី! 👋<br>ខ្ញុំជា <strong>Rex, ជំនួយការ AI សុវត្ថិភាព</strong>របស់អ្នក<br>ខ្ញុំនឹងណែនាំអ្នកអំពីបទប្បញ្ញត្តិសុវត្ថិភាព!',
     placeholder:'សួរសំណួរ ឬភ្ជាប់រូបភាពទីតាំង!', now:'ឥឡូវ',
     photoBarLabel:'📷 វិភាគហានិភ័យដោយរូបភាព', photoBarBtn:'ជ្រើសរូបភាព',
     disclaimer:'⚠️ នេះមិនមែនជាដំបូន្មានផ្លូវច្បាប់វិជ្ជាជីវៈ។',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 ជ្រើសប្រភេទវិភាគ', analysisSubtitle:'តើអ្នកចង់វិភាគរូបភាពយ៉ាងដូចម្តេច?',
     safetyBtn:'🔍 ការត្រួតពិនិត្យសុវត្ថិភាព', safetyDesc:'កំណត់ហានិភ័យ ការរំលោភបំពានច្បាប់',
     riskBtn:'⚠️ ការវាស់វែងហានិភ័យ', riskDesc:'ការវាស់វែងតាមភាពញឹកញាប់ × ភាពធ្ងន់ធ្ងរ',
@@ -434,11 +434,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment] Industry: {industry}, Role: {role}. Assess risks in this photo in Khmer language.',
   },
   my: {
-    name:'Burmese', greeting:'မင်္ဂလာပါ! 👋<br>ကျွန်တော် <strong>Dongjin၊ သင်၏ AI ဘေးကင်းရေးကူညီသူ</strong>ပါ<br>လုပ်ငန်းနှင့် ရာထူးအလိုက် ဘေးကင်းရေးစည်းမျဉ်းများ ဆက်သွယ်ပေးပါမည်!',
+    name:'Burmese', greeting:'မင်္ဂလာပါ! 👋<br>ကျွန်တော် <strong>Rex၊ သင်၏ AI ဘေးကင်းရေးကူညီသူ</strong>ပါ<br>လုပ်ငန်းနှင့် ရာထူးအလိုက် ဘေးကင်းရေးစည်းမျဉ်းများ ဆက်သွယ်ပေးပါမည်!',
     placeholder:'မေးခွန်းမေးသည် ဒါမှမဟုတ် ဓာတ်ပုံတင်ပါ!', now:'ယခု',
     photoBarLabel:'📷 ဓာတ်ပုံဖြင့် အန္တရာယ်ကို စစ်ဆေးခြင်း', photoBarBtn:'ဓာတ်ပုံရွေးပါ',
     disclaimer:'⚠️ ဤအချက်အလက်သည် တရားဝင်ဥပဒေအကြံဉာဏ် မဟုတ်ပါ။',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 စစ်ဆေးမှုပုံစံ ရွေးချယ်ပါ', analysisSubtitle:'ဓာတ်ပုံကို မည်သို့ စစ်ဆေးမည်နည်း?',
     safetyBtn:'🔍 ဘေးကင်းရေးစစ်ဆေးခြင်း', safetyDesc:'အန္တရာယ်ဖော်ထုတ်ခြင်း၊ ဥပဒေချိုးဖောက်မှုများ',
     riskBtn:'⚠️ အန္တရာယ်အဆင့်သတ်မှတ်ခြင်း', riskDesc:'အကြိမ်ရေ × ပြင်းထန်မှုအပေါ် အကဲဖြတ်ခြင်း',
@@ -452,11 +452,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment] Industry: {industry}, Role: {role}. Assess risks in this photo in Burmese language.',
   },
   uz: {
-    name:'Uzbek', greeting:"Salom! 👋<br>Men <strong>Dongjin, sizning AI xavfsizlik yordamchingiz</strong>man.<br>Sanoat va lavozimga qarab xavfsizlik qoidalarini tushuntiraman!",
+    name:'Uzbek', greeting:"Salom! 👋<br>Men <strong>Rex, sizning AI xavfsizlik yordamchingiz</strong>man.<br>Sanoat va lavozimga qarab xavfsizlik qoidalarini tushuntiraman!",
     placeholder:"Savol bering yoki joy surati yuboring!", now:'Hozir',
     photoBarLabel:"📷 Suratlar bilan xavf tahlili", photoBarBtn:'Surat tanlash',
     disclaimer:"⚠️ Bu professional huquqiy maslahat emas.",
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:"📷 Tahlil turini tanlang", analysisSubtitle:"Suratni qanday tahlil qilmoqchisiz?",
     safetyBtn:"🔍 Xavfsizlik tekshiruvi", safetyDesc:"Xavflarni aniqlash, qonun buzilishlari",
     riskBtn:"⚠️ Xavf baholash", riskDesc:"Chastota × Og'irlik asosida baholash",
@@ -470,11 +470,11 @@ const UI_TEXTS = {
     riskPrompt:"[Xavf baholash] Soha: {industry}, Lavozim: {role}. Xavflarni baholang: ①Xavf aniqlash ②Xavf taxmini ③Xavf qarori ④Kamaytirish choralari.",
   },
   ne: {
-    name:'Nepali', greeting:'नमस्ते! 👋<br>म <strong>Dongjin, तपाईंको AI सुरक्षा सहायक</strong> हुँ।<br>उद्योग र भूमिका अनुसार सुरक्षा नियमहरू मार्गदर्शन गर्नेछु!',
+    name:'Nepali', greeting:'नमस्ते! 👋<br>म <strong>Rex, तपाईंको AI सुरक्षा सहायक</strong> हुँ।<br>उद्योग र भूमिका अनुसार सुरक्षा नियमहरू मार्गदर्शन गर्नेछु!',
     placeholder:'प्रश्न सोध्नुहोस् वा साइट फोटो संलग्न गर्नुहोस्!', now:'अहिले',
     photoBarLabel:'📷 फोटोद्वारा जोखिम विश्लेषण', photoBarBtn:'फोटो छान्नुहोस्',
     disclaimer:'⚠️ यो पेशेवर कानुनी सल्लाह होइन।',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 विश्लेषण प्रकार छान्नुहोस्', analysisSubtitle:'फोटो कसरी विश्लेषण गर्न चाहनुहुन्छ?',
     safetyBtn:'🔍 सुरक्षा निरीक्षण', safetyDesc:'खतरा पहिचान, कानुन उल्लंघन',
     riskBtn:'⚠️ जोखिम मूल्यांकन', riskDesc:'आवृत्ति × गम्भीरतामा आधारित मूल्यांकन',
@@ -488,11 +488,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment] Industry: {industry}, Role: {role}. Assess risks in this photo in Nepali language.',
   },
   tl: {
-    name:'Filipino', greeting:'Kumusta! 👋<br>Ako si <strong>Dongjin, ang iyong AI Safety Assistant</strong>.<br>Gagabayan kita sa mga regulasyon sa kaligtasan!',
+    name:'Filipino', greeting:'Kumusta! 👋<br>Ako si <strong>Rex, ang iyong AI Safety Assistant</strong>.<br>Gagabayan kita sa mga regulasyon sa kaligtasan!',
     placeholder:'Magtanong o mag-attach ng larawan ng site!', now:'Ngayon',
     photoBarLabel:'📷 Pagsusuri ng panganib gamit ang larawan', photoBarBtn:'Pumili ng Larawan',
     disclaimer:'⚠️ Hindi ito propesyonal na legal na payo.',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Piliin ang Uri ng Pagsusuri', analysisSubtitle:'Paano mo gustong suriin ang larawan?',
     safetyBtn:'🔍 Inspeksyon sa Kaligtasan', safetyDesc:'Pagkilala ng panganib, paglabag sa batas',
     riskBtn:'⚠️ Pagtatasa ng Panganib', riskDesc:'Batay sa dalas × kalubhaan',
@@ -506,11 +506,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment] Industry: {industry}, Role: {role}. Assess risks in this photo in Filipino language.',
   },
   si: {
-    name:'Sinhala', greeting:'ආයුබෝවන්! 👋<br>මම <strong>Dongjin, ඔබේ AI ආරක්ෂක සහකරු</strong>.<br>කර්මාන්තය සහ භූමිකාව අනුව ආරක්ෂක රෙගුලාසි මඟ පෙන්වෙමි!',
+    name:'Sinhala', greeting:'ආයුබෝවන්! 👋<br>මම <strong>Rex, ඔබේ AI ආරක්ෂක සහකරු</strong>.<br>කර්මාන්තය සහ භූමිකාව අනුව ආරක්ෂක රෙගුලාසි මඟ පෙන්වෙමි!',
     placeholder:'ප්‍රශ්නයක් අසන්න හෝ ස්ථාන ඡායාරූපයක් ඇතුළත් කරන්න!', now:'දැන්',
     photoBarLabel:'📷 ඡායාරූප සමඟ අවදානම් විශ්ලේෂණය', photoBarBtn:'ඡායාරූපය තෝරන්න',
     disclaimer:'⚠️ මෙය වෘත්තීය නීතිමය උපදෙස් නොවේ.',
-    botName:'Dongjin', typingName:'Dongjin',
+    botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 විශ්ලේෂණ වර්ගය තෝරන්න', analysisSubtitle:'ඡායාරූපය කෙසේ විශ්ලේෂණය කරන්නද?',
     safetyBtn:'🔍 ආරක්ෂා පරීක්ෂාව', safetyDesc:'අන්තරාය හඳුනාගැනීම, නීති කඩකිරීම්',
     riskBtn:'⚠️ අවදානම් තක්සේරුව', riskDesc:'සංඛ්‍යාව × බරපතලකම මත පදනම්ව',
@@ -524,11 +524,11 @@ const UI_TEXTS = {
     riskPrompt:'[Risk Assessment] Industry: {industry}, Role: {role}. Assess risks in this photo in Sinhala language.',
   },
   ru: {
-    name:'Russian', greeting:'Привет! 👋<br>Я <strong>Донджин, ваш AI-помощник по безопасности</strong>.<br>Помогу разобраться в требованиях охраны труда!',
+    name:'Russian', greeting:'Привет! 👋<br>Я <strong>Рекс, ваш AI-помощник по безопасности</strong>.<br>Помогу разобраться в требованиях охраны труда!',
     placeholder:'Задайте вопрос или прикрепите фото объекта!', now:'Сейчас',
     photoBarLabel:'📷 Анализ рисков по фото', photoBarBtn:'Выбрать фото',
     disclaimer:'⚠️ Это не официальная юридическая консультация.',
-    botName:'Донджин', typingName:'Донджин',
+    botName:'Рекс', typingName:'Рекс',
     analysisTitle:'📷 Выберите тип анализа', analysisSubtitle:'Как вы хотите анализировать фото?',
     safetyBtn:'🔍 Проверка безопасности', safetyDesc:'Выявление опасностей, нарушений закона',
     riskBtn:'⚠️ Оценка рисков', riskDesc:'Оценка по частоте × тяжести последствий',
