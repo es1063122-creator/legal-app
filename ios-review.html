@@ -258,12 +258,12 @@
   </div>
 
   <div class="photo-bar" id="photoBar" style="display:none !important;">
-    <span class="photo-label" id="photoBarLabel">📷 현장 사진으로 위험성 분석</span>
+    <span class="photo-label" id="photoBarLabel"></span>
   </div>
 
   <div class="chat-input-area">
     <textarea class="chat-input" id="chatInput"
-      placeholder="질문하거나 현장 사진을 첨부해보세요!" rows="1"></textarea>
+      placeholder="궁금한 안전 질문을 입력해보세요!" rows="1"></textarea>
     <button class="send-btn" id="sendBtn" type="button" onclick="sendMessage()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -286,8 +286,8 @@ const BOT_BASE = 'https://raw.githubusercontent.com/es1063122-creator/legal-app/
 const UI_TEXTS = {
   ko: {
     name:'Korean', greeting:'안녕하세요! 👋<br>저는 <strong>안전관리 AI 어시스턴트 렉스</strong>예요.<br>업종과 직책에 맞게 안전 법령을 안내해드릴게요!',
-    placeholder:'질문하거나 현장 사진을 첨부해보세요!', now:'지금',
-    photoBarLabel:'📷 현장 사진으로 위험성 분석', photoBarBtn:'사진 선택',
+    placeholder:'궁금한 안전 질문을 입력해보세요!', now:'지금',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ 법적 효력이 있는 전문 법률 조언이 아닙니다. 중요 사안은 전문가(노무사/변호사/공단)와 확인하세요.',
     botName:'렉스', typingName:'렉스',
     analysisTitle:'📷 분석 방식 선택', analysisSubtitle:'현장 사진을 어떻게 분석할까요?',
@@ -304,8 +304,8 @@ const UI_TEXTS = {
   },
   en: {
     name:'English', greeting:'Hello! 👋<br>I am <strong>Rex, your AI Safety Assistant</strong>.<br>I will guide you on safety regulations by industry and role!',
-    placeholder:'Ask a question or attach a site photo!', now:'Now',
-    photoBarLabel:'📷 Risk analysis with site photos', photoBarBtn:'Select Photo',
+    placeholder:'Ask a safety question.', now:'Now',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ This is not professional legal advice. Please consult experts (attorney/lawyer/KOSHA) for important matters.',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Select Analysis Type', analysisSubtitle:'How would you like to analyze the site photo?',
@@ -322,8 +322,8 @@ const UI_TEXTS = {
   },
   'zh-CN': {
     name:'Chinese (Simplified)', greeting:'您好！👋<br>我是<strong>雷克斯，您的AI安全助手</strong>。<br>我将根据您的行业和职位为您提供安全法规指导！',
-    placeholder:'请提问或附上现场照片！', now:'现在',
-    photoBarLabel:'📷 用现场照片进行风险分析', photoBarBtn:'选择照片',
+    placeholder:'请输入您的安全问题！', now:'现在',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ 这不是具有法律效力的专业法律建议。重要事项请咨询专业人士。',
     botName:'雷克斯', typingName:'雷克斯',
     analysisTitle:'📷 选择分析方式', analysisSubtitle:'您希望如何分析现场照片？',
@@ -340,8 +340,8 @@ const UI_TEXTS = {
   },
   ja: {
     name:'Japanese', greeting:'こんにちは！👋<br>私は<strong>AI安全アシスタントのレックス</strong>です。<br>業種と職責に合わせて安全法令をご案内します！',
-    placeholder:'質問するか現場写真を添付してください！', now:'今',
-    photoBarLabel:'📷 現場写真でリスク分析', photoBarBtn:'写真を選択',
+    placeholder:'安全に関する質問を入力してください！', now:'今',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ 法的効力のある専門的な法律アドバイスではありません。重要事項は専門家にご確認ください。',
     botName:'レックス', typingName:'レックス',
     analysisTitle:'📷 分析方式の選択', analysisSubtitle:'現場写真をどのように分析しますか？',
@@ -358,8 +358,8 @@ const UI_TEXTS = {
   },
   vi: {
     name:'Vietnamese', greeting:'Xin chào! 👋<br>Tôi là <strong>Rex, trợ lý AI an toàn</strong> của bạn.<br>Tôi sẽ hướng dẫn bạn về quy định an toàn theo ngành và vai trò!',
-    placeholder:'Đặt câu hỏi hoặc đính kèm ảnh công trường!', now:'Bây giờ',
-    photoBarLabel:'📷 Phân tích rủi ro bằng ảnh công trường', photoBarBtn:'Chọn ảnh',
+    placeholder:'Nhập câu hỏi về an toàn của bạn!', now:'Bây giờ',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ Đây không phải là tư vấn pháp lý chuyên nghiệp.',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Chọn loại phân tích', analysisSubtitle:'Bạn muốn phân tích ảnh như thế nào?',
@@ -376,8 +376,8 @@ const UI_TEXTS = {
   },
   id: {
     name:'Indonesian', greeting:'Halo! 👋<br>Saya <strong>Rex, Asisten Keselamatan AI</strong> Anda.<br>Saya akan memandu Anda tentang peraturan keselamatan!',
-    placeholder:'Ajukan pertanyaan atau lampirkan foto lokasi!', now:'Sekarang',
-    photoBarLabel:'📷 Analisis risiko dengan foto lokasi', photoBarBtn:'Pilih Foto',
+    placeholder:'Tulis pertanyaan keselamatan Anda!', now:'Sekarang',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ Ini bukan nasihat hukum profesional.',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Pilih Jenis Analisis', analysisSubtitle:'Bagaimana Anda ingin menganalisis foto?',
@@ -394,8 +394,8 @@ const UI_TEXTS = {
   },
   th: {
     name:'Thai', greeting:'สวัสดี! 👋<br>ฉันคือ<strong>เร็กซ์ ผู้ช่วย AI ด้านความปลอดภัย</strong>ของคุณ<br>ฉันจะแนะนำกฎระเบียบความปลอดภัยตามอุตสาหกรรม!',
-    placeholder:'ถามคำถามหรือแนบรูปภาพสถานที่!', now:'ตอนนี้',
-    photoBarLabel:'📷 วิเคราะห์ความเสี่ยงด้วยรูปภาพ', photoBarBtn:'เลือกรูปภาพ',
+    placeholder:'พิมพ์คำถามด้านความปลอดภัยของคุณ!', now:'ตอนนี้',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ นี่ไม่ใช่คำแนะนำทางกฎหมายที่เป็นทางการ',
     botName:'เร็กซ์', typingName:'เร็กซ์',
     analysisTitle:'📷 เลือกประเภทการวิเคราะห์', analysisSubtitle:'คุณต้องการวิเคราะห์รูปภาพอย่างไร?',
@@ -412,8 +412,8 @@ const UI_TEXTS = {
   },
   mn: {
     name:'Mongolian', greeting:'Сайн байна уу! 👋<br>Би <strong>Рекс, таны AI аюулгүй байдлын туслах</strong>.<br>Аюулгүй байдлын дүрмийг таньд тайлбарлана!',
-    placeholder:'Асуулт асуу эсвэл зураг хавсаргана уу!', now:'Одоо',
-    photoBarLabel:'📷 Зургаар эрсдэл шинжлэх', photoBarBtn:'Зураг сонгох',
+    placeholder:'Аюулгүй байдлын асуултаа бичнэ үү!', now:'Одоо',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ Энэ нь мэргэжлийн хуулийн зөвлөгөө биш.',
     botName:'Рекс', typingName:'Рекс',
     analysisTitle:'📷 Шинжилгээний төрөл сонгох', analysisSubtitle:'Зургийг хэрхэн шинжлэх вэ?',
@@ -430,8 +430,8 @@ const UI_TEXTS = {
   },
   km: {
     name:'Khmer', greeting:'សួស្តី! 👋<br>ខ្ញុំជា <strong>Rex, ជំនួយការ AI សុវត្ថិភាព</strong>របស់អ្នក<br>ខ្ញុំនឹងណែនាំអ្នកអំពីបទប្បញ្ញត្តិសុវត្ថិភាព!',
-    placeholder:'សួរសំណួរ ឬភ្ជាប់រូបភាពទីតាំង!', now:'ឥឡូវ',
-    photoBarLabel:'📷 វិភាគហានិភ័យដោយរូបភាព', photoBarBtn:'ជ្រើសរូបភាព',
+    placeholder:'សូមបញ្ចូលសំណួរសុវត្ថិភាពរបស់អ្នក!', now:'ឥឡូវ',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ នេះមិនមែនជាដំបូន្មានផ្លូវច្បាប់វិជ្ជាជីវៈ។',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 ជ្រើសប្រភេទវិភាគ', analysisSubtitle:'តើអ្នកចង់វិភាគរូបភាពយ៉ាងដូចម្តេច?',
@@ -448,8 +448,8 @@ const UI_TEXTS = {
   },
   my: {
     name:'Burmese', greeting:'မင်္ဂလာပါ! 👋<br>ကျွန်တော် <strong>Rex၊ သင်၏ AI ဘေးကင်းရေးကူညီသူ</strong>ပါ<br>လုပ်ငန်းနှင့် ရာထူးအလိုက် ဘေးကင်းရေးစည်းမျဉ်းများ ဆက်သွယ်ပေးပါမည်!',
-    placeholder:'မေးခွန်းမေးသည် ဒါမှမဟုတ် ဓာတ်ပုံတင်ပါ!', now:'ယခု',
-    photoBarLabel:'📷 ဓာတ်ပုံဖြင့် အန္တရာယ်ကို စစ်ဆေးခြင်း', photoBarBtn:'ဓာတ်ပုံရွေးပါ',
+    placeholder:'ဘေးကင်းရေးမေးခွန်းကို ရိုက်ထည့်ပါ!', now:'ယခု',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ ဤအချက်အလက်သည် တရားဝင်ဥပဒေအကြံဉာဏ် မဟုတ်ပါ။',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 စစ်ဆေးမှုပုံစံ ရွေးချယ်ပါ', analysisSubtitle:'ဓာတ်ပုံကို မည်သို့ စစ်ဆေးမည်နည်း?',
@@ -466,8 +466,8 @@ const UI_TEXTS = {
   },
   uz: {
     name:'Uzbek', greeting:"Salom! 👋<br>Men <strong>Rex, sizning AI xavfsizlik yordamchingiz</strong>man.<br>Sanoat va lavozimga qarab xavfsizlik qoidalarini tushuntiraman!",
-    placeholder:"Savol bering yoki joy surati yuboring!", now:'Hozir',
-    photoBarLabel:"📷 Suratlar bilan xavf tahlili", photoBarBtn:'Surat tanlash',
+    placeholder:"Xavfsizlik bo‘yicha savolingizni yozing!", now:'Hozir',
+    photoBarLabel:"", photoBarBtn:'',
     disclaimer:"⚠️ Bu professional huquqiy maslahat emas.",
     botName:'Rex', typingName:'Rex',
     analysisTitle:"📷 Tahlil turini tanlang", analysisSubtitle:"Suratni qanday tahlil qilmoqchisiz?",
@@ -484,8 +484,8 @@ const UI_TEXTS = {
   },
   ne: {
     name:'Nepali', greeting:'नमस्ते! 👋<br>म <strong>Rex, तपाईंको AI सुरक्षा सहायक</strong> हुँ।<br>उद्योग र भूमिका अनुसार सुरक्षा नियमहरू मार्गदर्शन गर्नेछु!',
-    placeholder:'प्रश्न सोध्नुहोस् वा साइट फोटो संलग्न गर्नुहोस्!', now:'अहिले',
-    photoBarLabel:'📷 फोटोद्वारा जोखिम विश्लेषण', photoBarBtn:'फोटो छान्नुहोस्',
+    placeholder:'सुरक्षा सम्बन्धी प्रश्न लेख्नुहोस्!', now:'अहिले',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ यो पेशेवर कानुनी सल्लाह होइन।',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 विश्लेषण प्रकार छान्नुहोस्', analysisSubtitle:'फोटो कसरी विश्लेषण गर्न चाहनुहुन्छ?',
@@ -502,8 +502,8 @@ const UI_TEXTS = {
   },
   tl: {
     name:'Filipino', greeting:'Kumusta! 👋<br>Ako si <strong>Rex, ang iyong AI Safety Assistant</strong>.<br>Gagabayan kita sa mga regulasyon sa kaligtasan!',
-    placeholder:'Magtanong o mag-attach ng larawan ng site!', now:'Ngayon',
-    photoBarLabel:'📷 Pagsusuri ng panganib gamit ang larawan', photoBarBtn:'Pumili ng Larawan',
+    placeholder:'I-type ang iyong tanong tungkol sa kaligtasan!', now:'Ngayon',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ Hindi ito propesyonal na legal na payo.',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 Piliin ang Uri ng Pagsusuri', analysisSubtitle:'Paano mo gustong suriin ang larawan?',
@@ -520,8 +520,8 @@ const UI_TEXTS = {
   },
   si: {
     name:'Sinhala', greeting:'ආයුබෝවන්! 👋<br>මම <strong>Rex, ඔබේ AI ආරක්ෂක සහකරු</strong>.<br>කර්මාන්තය සහ භූමිකාව අනුව ආරක්ෂක රෙගුලාසි මඟ පෙන්වෙමි!',
-    placeholder:'ප්‍රශ්නයක් අසන්න හෝ ස්ථාන ඡායාරූපයක් ඇතුළත් කරන්න!', now:'දැන්',
-    photoBarLabel:'📷 ඡායාරූප සමඟ අවදානම් විශ්ලේෂණය', photoBarBtn:'ඡායාරූපය තෝරන්න',
+    placeholder:'ඔබේ ආරක්ෂක ප්‍රශ්නය ඇතුළත් කරන්න!', now:'දැන්',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ මෙය වෘත්තීය නීතිමය උපදෙස් නොවේ.',
     botName:'Rex', typingName:'Rex',
     analysisTitle:'📷 විශ්ලේෂණ වර්ගය තෝරන්න', analysisSubtitle:'ඡායාරූපය කෙසේ විශ්ලේෂණය කරන්නද?',
@@ -538,8 +538,8 @@ const UI_TEXTS = {
   },
   ru: {
     name:'Russian', greeting:'Привет! 👋<br>Я <strong>Рекс, ваш AI-помощник по безопасности</strong>.<br>Помогу разобраться в требованиях охраны труда!',
-    placeholder:'Задайте вопрос или прикрепите фото объекта!', now:'Сейчас',
-    photoBarLabel:'📷 Анализ рисков по фото', photoBarBtn:'Выбрать фото',
+    placeholder:'Введите вопрос по безопасности!', now:'Сейчас',
+    photoBarLabel:'', photoBarBtn:'',
     disclaimer:'⚠️ Это не официальная юридическая консультация.',
     botName:'Рекс', typingName:'Рекс',
     analysisTitle:'📷 Выберите тип анализа', analysisSubtitle:'Как вы хотите анализировать фото?',
